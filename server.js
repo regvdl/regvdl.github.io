@@ -750,8 +750,6 @@ function generateAutoAgentPulse() {
     pulses: countryPulses[targetCountry]
   };
 }
-  };
-}
 
 function executeAutoAgentAttack(agentData) {
   if (!agentData) return;
