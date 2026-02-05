@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GlobalPulseMap - Real-Time Global Pulse Counter</title>
+    <title>GlobalAttackMap - Real-Time Global Attack Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
     <style>
         * {
             margin: 0;
@@ -40,20 +39,20 @@
 
         [data-theme="light"] {
             color-scheme: light;
-            --primary: #6D28D9;
-            --primary-dark: #5B21B6;
-            --primary-light: #8B5CF6;
-            --bg-primary: #F8FAFF;
+            --primary: #4F46E5;
+            --primary-dark: #4338CA;
+            --primary-light: #6366F1;
+            --bg-primary: #F7F8FC;
             --bg-secondary: #FFFFFF;
-            --bg-tertiary: #F1F5F9;
+            --bg-tertiary: #EEF2F7;
             --surface: rgba(255, 255, 255, 0.95);
             --surface-strong: rgba(255, 255, 255, 0.98);
-            --text-primary: #0F172A;
-            --text-secondary: #475569;
-            --text-tertiary: #64748B;
-            --border: rgba(100, 116, 139, 0.3);
-            --shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
-            --glow: 0 0 24px rgba(109, 40, 217, 0.25);
+            --text-primary: #111827;
+            --text-secondary: #374151;
+            --text-tertiary: #6B7280;
+            --border: rgba(148, 163, 184, 0.35);
+            --shadow: 0 24px 60px rgba(15, 23, 42, 0.1);
+            --glow: 0 0 24px rgba(79, 70, 229, 0.2);
         }
 
         [data-theme="light"] .map-chip {
@@ -263,9 +262,22 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            box-shadow: var(--glow);
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             font-size: 1.3rem;
+        }
+
+        .brand-mark svg {
+            width: 30.8px;
+            height: 30.8px;
+            display: block;
+            transform: rotate(135deg);
+            transform-origin: 50% 50%;
+        }
+        
+        [data-theme="light"] .brand-mark {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .brand-title {
@@ -422,7 +434,7 @@
             .layout {
                 grid-template-columns: minmax(0, 1fr) minmax(300px, 0.35fr);
                 gap: 12px;
-                padding: 12px;
+                padding: 8px;
             }
 
             .side-panel {
@@ -512,7 +524,7 @@
         }
 
         .notification-feed-header {
-            padding: 6px 8px;
+            padding: 4px 6px;
             text-align: center;
             border-bottom: 1px solid var(--border);
         }
@@ -614,7 +626,7 @@
             gap: 12px;
             background: rgba(15, 23, 42, 0.75);
             border: 1px solid var(--border);
-            padding: 10px 12px;
+            padding: 8px 10px;
             border-radius: 16px;
             backdrop-filter: blur(10px);
             pointer-events: auto;
@@ -626,7 +638,7 @@
                 left: 50%;
                 transform: translateX(-50%);
                 bottom: 16px;
-                padding: 12px 16px;
+                padding: 10px 14px;
             }
             
             .pulse-btn {
@@ -657,9 +669,9 @@
             border: none;
             margin: 0;
             /* Match Deploy Beacon dimensions exactly */
-            padding: 14px 28px !important;
+            padding: 10px 20px !important;
             min-width: 200px !important;
-            height: 48px !important;
+            height: 40px !important;
             position: absolute;
             bottom: 20px;
             left: 50%;
@@ -708,7 +720,7 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border: 2px solid var(--border);
             border-radius: 12px;
             background: var(--bg-tertiary);
@@ -839,7 +851,7 @@
         }
 
         .range-btn {
-            padding: 8px 12px;
+            padding: 6px 10px;
             background: var(--bg-tertiary);
             border: 2px solid var(--border);
             border-radius: 8px;
@@ -870,7 +882,7 @@
 
         @media (max-width: 640px) {
             .range-btn {
-                padding: 6px 8px;
+                padding: 5px 7px;
                 font-size: 0.75rem;
                 min-width: 80px;
             }
@@ -886,7 +898,7 @@
             background: #f8f9fa;
             border: 1px solid #dadce0;
             border-radius: 8px;
-            padding: 12px;
+            padding: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             animation: fadeIn 0.3s ease;
             min-width: 0;
@@ -1260,11 +1272,11 @@
         .tab-menu {
             display: flex;
             gap: 6px;
-            padding: 8px;
+            padding: 6px;
             border-bottom: 1px solid var(--border);
             background: rgba(15, 23, 42, 0.5);
             overflow-x: auto;
-            min-height: 44px;
+            min-height: 38px;
             align-items: center;
             flex-wrap: nowrap;
         }
@@ -1273,7 +1285,7 @@
             .tab-menu {
                 gap: 4px;
                 padding: 6px;
-                min-height: 40px;
+                min-height: 36px;
             }
         }
 
@@ -1286,7 +1298,7 @@
         }
 
         .tab-button {
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-radius: 8px;
             background: transparent;
             border: 1px solid transparent;
@@ -1313,17 +1325,17 @@
 
         @media (max-width: 640px) {
             .tab-button {
-                padding: 8px 12px;
+                padding: 6px 10px;
                 font-size: 0.8rem;
-                min-height: 44px;
+                min-height: 38px;
             }
         }
 
         @media (max-width: 480px) {
             .tab-button {
-                padding: 7px 10px;
+                padding: 6px 8px;
                 font-size: 0.75rem;
-                min-height: 44px;
+                min-height: 36px;
             }
         }
 
@@ -1338,7 +1350,7 @@
         .tab-content {
             flex: 1;
             overflow-y: auto;
-            padding: 10px;
+            padding: 8px;
             display: none;
             flex-direction: column;
             gap: 8px;
@@ -1401,7 +1413,7 @@
             background: var(--surface-strong);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
-            padding: 10px;
+            padding: 8px;
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
@@ -1416,7 +1428,7 @@
             background: var(--surface-strong);
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
-            padding: 10px;
+            padding: 8px;
             border-radius: var(--radius-lg);
             gap: 8px;
         }
@@ -1470,18 +1482,18 @@
             background: var(--bg-tertiary);
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
-            padding: 10px;
+            padding: 8px;
             display: flex;
             flex-direction: column;
             gap: 6px;
-            min-height: 70px;
+            min-height: 60px;
             justify-content: space-between;
         }
 
         @media (max-width: 640px) {
             .stat {
-                min-height: 60px;
-                padding: 8px;
+                min-height: 50px;
+                padding: 6px;
             }
         }
 
@@ -1555,7 +1567,7 @@
             background: rgba(255, 87, 51, 0.1);
             border: 1px solid rgba(255, 87, 51, 0.3);
             border-radius: 8px;
-            padding: 10px;
+            padding: 8px;
             text-align: center;
             font-size: 0.85rem;
             color: #ff5733;
@@ -1571,7 +1583,7 @@
         }
 
         .battle-target {
-            padding: 6px 8px;
+            padding: 5px 7px;
             border-radius: var(--radius-md);
             background: var(--bg-tertiary);
             border: 1px solid var(--border);
@@ -1808,6 +1820,11 @@
                 font-size: 1.1rem;
             }
 
+            .brand-mark svg {
+                width: 26.4px;
+                height: 26.4px;
+            }
+
             .brand-title {
                 font-size: 1rem;
             }
@@ -1976,7 +1993,7 @@
                 flex-direction: row;
                 gap: 6px;
                 flex-wrap: wrap;
-                padding: 6px 8px;
+                padding: 5px 7px;
             }
 
             .pulse-btn {
@@ -2003,17 +2020,17 @@
 
         @media (max-width: 640px) {
             .app {
-                padding: 6px;
-                gap: 6px;
+                padding: 3px;
+                gap: 3px;
             }
 
             .topbar {
                 height: auto;
                 min-height: auto;
-                padding: 6px;
-                gap: 3px;
+                padding: 3px;
+                gap: 2px;
                 flex-wrap: wrap;
-                border-radius: 10px;
+                border-radius: 8px;
             }
 
             .topbar.ad-active-mobile {
@@ -2021,92 +2038,93 @@
             }
 
             .brand {
-                gap: 4px;
+                gap: 3px;
                 flex: 1 1 auto;
             }
 
             .brand-mark {
-                width: 30px;
-                height: 30px;
-                font-size: 0.9rem;
+                width: 28px;
+                height: 28px;
+                font-size: 0.85rem;
                 border-radius: 6px;
             }
 
             .brand-title {
-                font-size: 0.8rem;
+                font-size: 0.75rem;
             }
 
             .brand-subtitle {
-                display: block;
-                font-size: 0.55rem;
+                display: none;
+                font-size: 0.5rem;
             }
 
             .topbar-actions {
                 width: 100%;
                 justify-content: flex-start;
-                gap: 4px;
+                gap: 2px;
             }
 
             .status {
                 display: inline-flex;
-                font-size: 0.6rem;
-                padding: 0.25rem 0.45rem;
+                font-size: 0.55rem;
+                padding: 0.2rem 0.3rem;
             }
 
             .mini-widget {
                 display: flex;
-                min-width: 70px;
-                padding: 0.25rem 0.4rem;
-                font-size: 0.6rem;
+                min-width: 60px;
+                padding: 0.2rem 0.3rem;
+                font-size: 0.55rem;
             }
 
             .icon-btn {
-                padding: 0.3rem;
-                font-size: 0.8rem;
-                min-width: 28px;
-                min-height: 28px;
+                padding: 0.25rem;
+                font-size: 0.75rem;
+                min-width: 24px;
+                min-height: 24px;
             }
 
             .layout {
                 grid-template-columns: 1fr;
-                grid-template-rows: minmax(260px, 38dvh) minmax(0, 1fr);
-                gap: 4px;
+                grid-template-rows: minmax(240px, 35dvh) minmax(0, 1fr);
+                gap: 2px;
             }
 
             .map-panel {
-                min-height: 260px;
-                max-height: 38dvh;
+                min-height: 240px;
+                max-height: 35dvh;
             }
 
             .tab-menu {
-                padding: 6px;
-                gap: 4px;
+                padding: 4px;
+                gap: 2px;
             }
 
             .tab-content {
-                padding: 4px;
+                padding: 3px;
             }
 
             .map-panel {
-                border-radius: 10px;
+                border-radius: 8px;
             }
 
             .map-overlay {
-                inset: 6px;
+                inset: 3px;
             }
 
             .map-chip {
                 flex-direction: column;
                 margin-left: 0;
                 max-width: 100%;
-                padding: 4px 6px;
-                gap: 4px;
-                border-radius: 8px;
-                max-height: 20dvh;
+                padding: 3px 4px;
+                gap: 3px;
+                border-radius: 6px;
+                max-height: 18dvh;
                 overflow: auto;
                 left: auto;
-                right: 6px;
-                width: min(68vw, 220px);
+                right: 3px;
+                top: 3px;
+                width: min(65vw, 200px);
             }
 
             .chip-block {
@@ -2115,12 +2133,12 @@
 
             .chip-row {
                 flex-direction: column;
-                gap: 4px;
+                gap: 2px;
             }
 
             .chip-metrics {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 4px 6px;
+                gap: 3px 4px;
                 width: 100%;
             }
 
@@ -2147,7 +2165,7 @@
             .pulse-console {
                 flex-direction: column;
                 align-items: stretch;
-                padding: 5px 6px;
+                padding: 4px 5px;
                 gap: 4px;
                 border-radius: 8px;
             }
@@ -2649,7 +2667,7 @@
 
             .map-chip {
                 max-width: 150px;
-                padding: 6px 8px;
+                padding: 5px 7px;
                 gap: 6px;
             }
 
@@ -2733,10 +2751,23 @@
     <!-- Fixed Header -->
     <header class="topbar" style="position: fixed; top: 0; left: 0; right: 0; height: 60px; z-index: 1000; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; gap: 12px; flex-wrap: nowrap;">
         <div class="brand" style="flex-shrink: 0;">
-            <div class="brand-mark">🌍</div>
+            <div class="brand-mark">
+                <svg width="32" height="32" viewBox="-166.4 -166.4 844.8 844.8" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <defs>
+                        <linearGradient id="brandRocketGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="var(--primary)" />
+                            <stop offset="100%" stop-color="var(--primary-dark)" />
+                        </linearGradient>
+                    </defs>
+                    <g transform="translate(256, 256) translate(50, 0) matrix(-1, 0, 0, 1, 0, 0) rotate(45) scale(1.35) translate(-256, -256)">
+                        <path fill="url(#brandRocketGradient)" stroke="url(#brandRocketGradient)" stroke-width="0.00512" d="M511.317,0.683c-43.328-3.938-75.594,9.047-112.063,45.516l66.547,66.547 C502.286,76.261,515.255,44.026,511.317,0.683z"></path>
+                        <polygon fill="url(#brandRocketGradient)" stroke="url(#brandRocketGradient)" stroke-width="0.00512" points="381.161,64.292 314.021,131.433 249.239,115.667 221.239,143.683 261.505,183.964 126.536,318.917 44.177,317.245 0.005,361.401 53.692,415.12 119.661,349.151 129.88,359.354 47.567,441.667 70.349,464.433 152.646,382.12 162.849,392.339 96.88,458.292 150.599,511.995 194.755,467.808 193.083,385.464 328.036,250.495 368.302,290.776 396.333,262.761 380.583,197.979 447.708,130.839 "></polygon>
+                    </g>
+                </svg>
+            </div>
             <div class="brand-text">
-                <div class="brand-title">GlobalPulseMap</div>
-                <div class="brand-subtitle">Real-time global pulse arena</div>
+                <div class="brand-title">GlobalAttackMap</div>
+                <div class="brand-subtitle">Real-time global attack arena</div>
             </div>
         </div>
         <div id="adPlaceholderMobile" class="ad-placeholder-mobile"></div>
@@ -2746,7 +2777,6 @@
                 <img id="userAvatar" src="" alt="" style="width: 28px; height: 28px; border-radius: 50%; display: none;">
                 <div>
                     <div id="userName" style="font-weight: 600; font-size: 0.75rem; line-height: 1.2;"></div>
-                    <div id="userCountryScore" style="font-size: 0.6rem; color: var(--text-tertiary);"></div>
                 </div>
             </div>
             <button id="loginBtn" class="icon-btn" style="display: flex; align-items: center; gap: 4px; padding: 6px 10px; font-size: 0.8rem; font-weight: 600; flex-shrink: 0;">👤 Login</button>
@@ -2771,61 +2801,96 @@
         <div class="command-center" style="width: 40%; background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; opacity: 1; transition: opacity 0.5s ease;">
             
             <!-- Command Tabs -->
-            <div class="command-tabs" style="display: flex; background: var(--bg-tertiary); border-bottom: 1px solid var(--border); padding: 8px; gap: 6px;">
-                <button class="command-tab active" data-tab="attack" style="flex: 1; padding: 10px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">🎯 Attack</button>
-                <button class="command-tab" data-tab="stats" style="flex: 1; padding: 10px; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">📊 Stats</button>
-                <button class="command-tab" data-tab="settings" style="flex: 1; padding: 10px; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">⚙️ Settings</button>
-                <button class="command-tab" data-tab="help" style="flex: 1; padding: 10px; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">❓ Help</button>
+            <div class="command-tabs" style="display: flex; background: var(--bg-tertiary); border-bottom: 1px solid var(--border); padding: 6px; gap: 4px;">
+                <button class="command-tab active" data-tab="attack" data-tooltip="Attack controls: choose target, type, range, and defenses" style="flex: 1; padding: 3px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">🎯 Attack</button>
+                <button class="command-tab" data-tab="stats" data-tooltip="Stats panel: live counts, leaderboards, and activity" style="flex: 1; padding: 3px; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">📊 Stats</button>
+                <button class="command-tab" data-tab="settings" data-tooltip="Settings: theme, sound, performance, and data reset" style="flex: 1; padding: 3px; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">⚙️ Settings</button>
+                <button class="command-tab" data-tab="help" data-tooltip="Help: tips, attack types, defense types, and map legend" style="flex: 1; padding: 3px; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">❓ Help</button>
             </div>
             
             <!-- Command Content -->
-            <div class="command-content" style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 12px;">
+            <div class="command-content" style="flex: 1; overflow-y: auto; overflow-x: hidden; padding: 8px; display: flex; flex-direction: column; gap: 8px;">
                 
                 <!-- ATTACK TAB -->
                 <div class="tab-panel active" data-panel="attack">
-                    <!-- Attack Type Buttons -->
-                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border);">
-                        <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">⚡ ATTACK TYPE</div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
-                            <button class="battle-attack-btn active" data-type="pulse" style="padding: 12px 8px; background: rgba(59, 130, 246, 0.2); border: 2px solid #3b82f6; border-radius: 8px; cursor: pointer; color: #3b82f6; font-weight: bold; font-size: 0.75rem; line-height: 1.3;">
-                                📡 Pulse<br><span style="font-size: 0.65rem; opacity: 0.8;">FREE</span>
-                            </button>
-                            <button class="battle-attack-btn" data-type="laser" style="padding: 12px 8px; background: rgba(239, 68, 68, 0.1); border: 2px solid var(--border); border-radius: 8px; cursor: pointer; color: var(--text-secondary); font-weight: bold; font-size: 0.75rem; line-height: 1.3;">
-                                ⚡ Laser<br><span style="font-size: 0.65rem; opacity: 0.8;">10 pts</span>
-                            </button>
-                            <button class="battle-attack-btn" data-type="emp" style="padding: 12px 8px; background: rgba(245, 158, 11, 0.1); border: 2px solid var(--border); border-radius: 8px; cursor: pointer; color: var(--text-secondary); font-weight: bold; font-size: 0.75rem; line-height: 1.3;">
-                                💥 EMP<br><span style="font-size: 0.65rem; opacity: 0.8;">25 pts</span>
-                            </button>
+                    <!-- Target Info Display -->
+                    <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 6px; border: 1px solid var(--border);" data-tooltip="Selected target details: location, age, points, distance, type, defenses">
+                        <div style="font-weight: 600; font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">🎯 TARGET</div>
+                        <div id="commandTargetInfo" style="padding: 8px; background: var(--bg-secondary); border-radius: 6px; border: 1px solid var(--border);">
+                            <div id="battleTargetNameCompact" style="font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px;">No target selected</div>
+                            <div id="targetInfoCountry" style="font-size: 0.65rem; color: var(--text-tertiary); margin-bottom: 6px; line-height: 1.3;">Click map to select</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.65rem; margin-bottom: 6px;">
+                                <div style="display: flex; flex-direction: column; gap: 1px;">
+                                    <span style="color: var(--text-tertiary);">⏱️ Age:</span>
+                                    <span id="targetInfoAge" style="font-weight: 700; color: var(--text-primary);">—</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 1px;">
+                                    <span style="color: var(--text-tertiary);">💎 Points:</span>
+                                    <span id="targetInfoPoints" style="font-weight: 700; color: var(--primary); font-size: 0.8rem;">0</span>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.65rem; padding-top: 6px; border-top: 1px solid var(--border);">
+                                <div style="display: flex; flex-direction: column; gap: 1px;">
+                                    <span style="color: var(--text-tertiary);">📏 Distance:</span>
+                                    <span id="targetInfoDistance" style="font-weight: 600; color: var(--text-primary);">—</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 1px;">
+                                    <span style="color: var(--text-tertiary);">🎭 Type:</span>
+                                    <span id="targetInfoType" style="font-weight: 600; color: var(--text-primary);">—</span>
+                                </div>
+                            </div>
+                            <div id="targetInfoDefense" style="display: none; font-size: 0.6rem; color: var(--text-tertiary); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border);"></div>
                         </div>
                     </div>
 
-                    <!-- Target Info Display -->
-                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border);">
-                        <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">🎯 TARGET</div>
-                        <div id="commandTargetInfo" style="padding: 10px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border);">
-                            <div id="battleTargetNameCompact" style="font-weight: 700; font-size: 0.9rem; margin-bottom: 4px;">No target selected</div>
-                            <div id="targetInfoCountry" style="font-size: 0.75rem; color: var(--text-tertiary); margin-bottom: 6px;">Click map to select</div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.7rem;">
-                                <div><span style="color: var(--text-tertiary);">Age:</span> <span id="targetInfoAge" style="font-weight: 600;">—</span></div>
-                                <div><span style="color: var(--text-tertiary);">Points:</span> <span id="targetInfoPoints" style="font-weight: 600; color: var(--primary);">0</span></div>
-                            </div>
+                    <!-- Attack Type Buttons -->
+                    <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 6px; border: 1px solid var(--border);" data-tooltip="Choose a rocket type: Scout (free), Arrow (10 pts), Titan (25 pts)">
+                        <div style="font-weight: 600; font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">⚡ ATTACK TYPE</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;">
+                            <button class="battle-attack-btn active" data-type="pulse" data-tooltip="Scout (free)" style="padding: 4px 3px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.7rem; line-height: 1.2;">
+                                <svg width="15.4" height="15.4" viewBox="-166.4 -166.4 844.8 844.8" xmlns="http://www.w3.org/2000/svg" style="display:block; margin: 0 auto 2px auto;" aria-hidden="true">
+                                    <g transform="translate(256, 256) translate(120, 0) matrix(-1, 0, 0, 1, 0, 0) rotate(45) scale(1.35) translate(-256, -256)">
+                                        <path fill="currentColor" stroke="currentColor" stroke-width="0.00512" d="M511.317,0.683c-43.328-3.938-75.594,9.047-112.063,45.516l66.547,66.547 C502.286,76.261,515.255,44.026,511.317,0.683z"></path>
+                                        <polygon fill="currentColor" stroke="currentColor" stroke-width="0.00512" points="381.161,64.292 314.021,131.433 249.239,115.667 221.239,143.683 261.505,183.964 126.536,318.917 44.177,317.245 0.005,361.401 53.692,415.12 119.661,349.151 129.88,359.354 47.567,441.667 70.349,464.433 152.646,382.12 162.849,392.339 96.88,458.292 150.599,511.995 194.755,467.808 193.083,385.464 328.036,250.495 368.302,290.776 396.333,262.761 380.583,197.979 447.708,130.839 "></polygon>
+                                    </g>
+                                </svg>
+                                Scout<br><span style="font-size: 0.6rem; opacity: 0.8;">FREE</span>
+                            </button>
+                            <button class="battle-attack-btn" data-type="laser" data-tooltip="Arrow (10 pts)" style="padding: 4px 3px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.7rem; line-height: 1.2;">
+                                <svg width="17.7" height="17.7" viewBox="-166.4 -166.4 844.8 844.8" xmlns="http://www.w3.org/2000/svg" style="display:block; margin: 0 auto 2px auto;" aria-hidden="true">
+                                    <g transform="translate(256, 256) translate(120, 0) matrix(-1, 0, 0, 1, 0, 0) rotate(45) scale(1.35) translate(-256, -256)">
+                                        <path fill="currentColor" stroke="currentColor" stroke-width="0.00512" d="M511.317,0.683c-43.328-3.938-75.594,9.047-112.063,45.516l66.547,66.547 C502.286,76.261,515.255,44.026,511.317,0.683z"></path>
+                                        <polygon fill="currentColor" stroke="currentColor" stroke-width="0.00512" points="381.161,64.292 314.021,131.433 249.239,115.667 221.239,143.683 261.505,183.964 126.536,318.917 44.177,317.245 0.005,361.401 53.692,415.12 119.661,349.151 129.88,359.354 47.567,441.667 70.349,464.433 152.646,382.12 162.849,392.339 96.88,458.292 150.599,511.995 194.755,467.808 193.083,385.464 328.036,250.495 368.302,290.776 396.333,262.761 380.583,197.979 447.708,130.839 "></polygon>
+                                    </g>
+                                </svg>
+                                Arrow<br><span style="font-size: 0.6rem; opacity: 0.8;">10 pts</span>
+                            </button>
+                            <button class="battle-attack-btn" data-type="emp" data-tooltip="Titan (25 pts)" style="padding: 4px 3px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.7rem; line-height: 1.2;">
+                                <svg width="20" height="20" viewBox="-166.4 -166.4 844.8 844.8" xmlns="http://www.w3.org/2000/svg" style="display:block; margin: 0 auto 2px auto;" aria-hidden="true">
+                                    <g transform="translate(256, 256) translate(120, 0) matrix(-1, 0, 0, 1, 0, 0) rotate(45) scale(1.35) translate(-256, -256)">
+                                        <path fill="currentColor" stroke="currentColor" stroke-width="0.00512" d="M511.317,0.683c-43.328-3.938-75.594,9.047-112.063,45.516l66.547,66.547 C502.286,76.261,515.255,44.026,511.317,0.683z"></path>
+                                        <polygon fill="currentColor" stroke="currentColor" stroke-width="0.00512" points="381.161,64.292 314.021,131.433 249.239,115.667 221.239,143.683 261.505,183.964 126.536,318.917 44.177,317.245 0.005,361.401 53.692,415.12 119.661,349.151 129.88,359.354 47.567,441.667 70.349,464.433 152.646,382.12 162.849,392.339 96.88,458.292 150.599,511.995 194.755,467.808 193.083,385.464 328.036,250.495 368.302,290.776 396.333,262.761 380.583,197.979 447.708,130.839 "></polygon>
+                                    </g>
+                                </svg>
+                                Titan<br><span style="font-size: 0.6rem; opacity: 0.8;">25 pts</span>
+                            </button>
                         </div>
                     </div>
 
                     <!-- Range Buttons -->
-                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border);" data-tooltip="Select attack range - Closer targets are easier to hit">
-                        <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">📍 ATTACK RANGE</div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                            <button class="range-btn active" data-range="500" style="padding: 10px; background: var(--bg-secondary); border: 2px solid #3b82f6; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.75rem; color: var(--text-primary);">
+                    <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 6px; border: 1px solid var(--border);" data-tooltip="Set attack range: shorter range is safer, global reaches anywhere">
+                        <div style="font-weight: 600; font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">📍 ATTACK RANGE</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                            <button class="range-btn active" data-range="500" data-tooltip="Attack targets within 500km" style="padding: 3px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border: 2px solid var(--primary); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.7rem; color: white;">
                                 🔵 500km
                             </button>
-                            <button class="range-btn" data-range="1000" style="padding: 10px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.75rem; color: var(--text-secondary);">
+                            <button class="range-btn" data-range="1000" data-tooltip="Attack targets within 1000km" style="padding: 3px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.7rem; color: var(--text-secondary);">
                                 🟡 1000km
                             </button>
-                            <button class="range-btn" data-range="4000" style="padding: 10px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.75rem; color: var(--text-secondary);">
+                            <button class="range-btn" data-range="4000" data-tooltip="Attack targets within 4000km" style="padding: 3px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.7rem; color: var(--text-secondary);">
                                 🔴 4000km
                             </button>
-                            <button class="range-btn" data-range="global" style="padding: 10px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.75rem; color: var(--text-secondary);">
+                            <button class="range-btn" data-range="global" data-tooltip="Attack targets anywhere" style="padding: 3px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.7rem; color: var(--text-secondary);">
                                 🌍 Global
                             </button>
                         </div>
@@ -2833,68 +2898,68 @@
                     </div>
 
                     <!-- Defense Upgrades -->
-                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border);" data-tooltip="Upgrade your defenses to protect your beacons from attacks">
-                        <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">🔧 DEFENSE UPGRADES</div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
-                            <button class="defense-upgrade-btn" data-upgrade="shield" style="padding: 10px 6px; background: rgba(59, 130, 246, 0.1); border: 2px solid var(--border); border-radius: 8px; cursor: pointer; color: #3b82f6; font-weight: bold; font-size: 0.7rem; line-height: 1.3;">
-                                🛡️ Shield<br><span style="font-size: 0.6rem;">Lvl <span id="shieldLevel">0</span></span>
+                    <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 6px; border: 1px solid var(--border);" data-tooltip="Upgrade defenses: Shield, Armor, and Interceptor levels">
+                        <div style="font-weight: 600; font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">🔧 DEFENSE UPGRADES</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;">
+                            <button class="defense-upgrade-btn" data-upgrade="shield" data-tooltip="Upgrade shield HP" style="padding: 4px 2px; background: rgba(59, 130, 246, 0.1); border: 2px solid var(--border); border-radius: 6px; cursor: pointer; color: #3b82f6; font-weight: bold; font-size: 0.65rem; line-height: 1.2;">
+                                🛡️ Shield<br><span style="font-size: 0.55rem;">Lvl <span id="shieldLevel">0</span></span>
                             </button>
-                            <button class="defense-upgrade-btn" data-upgrade="armor" style="padding: 10px 6px; background: rgba(168, 85, 247, 0.1); border: 2px solid var(--border); border-radius: 8px; cursor: pointer; color: #a855f7; font-weight: bold; font-size: 0.7rem; line-height: 1.3;">
-                                🔒 Armor<br><span style="font-size: 0.6rem;">Lvl <span id="armorLevel">0</span></span>
+                            <button class="defense-upgrade-btn" data-upgrade="armor" data-tooltip="Upgrade armor damage reduction" style="padding: 4px 2px; background: rgba(168, 85, 247, 0.1); border: 2px solid var(--border); border-radius: 6px; cursor: pointer; color: #a855f7; font-weight: bold; font-size: 0.65rem; line-height: 1.2;">
+                                🔒 Armor<br><span style="font-size: 0.55rem;">Lvl <span id="armorLevel">0</span></span>
                             </button>
-                            <button class="defense-upgrade-btn" data-upgrade="interceptor" style="padding: 10px 6px; background: rgba(6, 182, 212, 0.1); border: 2px solid var(--border); border-radius: 8px; cursor: pointer; color: #06b6d4; font-weight: bold; font-size: 0.7rem; line-height: 1.3;">
-                                🚀 Intercept<br><span style="font-size: 0.6rem;">Lvl <span id="interceptorLevel">0</span></span>
+                            <button class="defense-upgrade-btn" data-upgrade="interceptor" data-tooltip="Upgrade intercept chance" style="padding: 4px 2px; background: rgba(6, 182, 212, 0.1); border: 2px solid var(--border); border-radius: 6px; cursor: pointer; color: #06b6d4; font-weight: bold; font-size: 0.65rem; line-height: 1.2;">
+                                🚀 Intercept<br><span style="font-size: 0.55rem;">Lvl <span id="interceptorLevel">0</span></span>
                             </button>
                         </div>
                     </div>
 
                     <!-- Battle Stats Grid -->
-                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 14px; border: 1px solid var(--border);" data-tooltip="Your current battle statistics and performance">
+                    <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 8px; border: 1px solid var(--border);">
                         <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 12px; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
                             <span>📊</span>
-                            <span>Battle Stats</span>
+                            <span data-tooltip="Core battle metrics from your current session">Battle Stats</span>
                         </div>
                         
                         <!-- Main Stats Row 1 -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                             <!-- Session Time -->
-                            <div style="padding: 12px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(59, 130, 246, 0.1)); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3); text-align: center;">
+                            <div style="padding: 3px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(59, 130, 246, 0.1)); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3); text-align: center;" data-tooltip="How long you've been playing in this session">
                                 <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">⏱️ Session</div>
                                 <div id="sessionTime" style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">0m</div>
                             </div>
                             <!-- Kills -->
-                            <div style="padding: 12px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1)); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3); text-align: center;">
+                            <div style="padding: 3px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1)); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3); text-align: center;" data-tooltip="Total enemies destroyed in this session">
                                 <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">💀 Kills</div>
                                 <div id="killCount" style="font-weight: 700; font-size: 0.95rem; color: #ef4444;">0</div>
                             </div>
-                            <!-- Score -->
-                            <div style="padding: 12px; background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(139, 92, 246, 0.1)); border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.3); text-align: center;">
-                                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">⭐ Score</div>
-                                <div id="personalScore" style="font-weight: 700; font-size: 0.95rem; color: var(--primary);">0</div>
+                            <!-- Damage Per Kill -->
+                            <div style="padding: 3px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1)); border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.3); text-align: center;" data-tooltip="Average damage dealt per enemy killed">
+                                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">💥 Avg DMG</div>
+                                <div id="avgDamage" style="font-weight: 700; font-size: 0.95rem; color: #f59e0b;">0</div>
                             </div>
-                            <!-- Streak -->
-                            <div style="padding: 12px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1)); border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.3); text-align: center;">
-                                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">🔥 Streak</div>
-                                <div id="sessionStreak" style="font-weight: 700; font-size: 0.95rem; color: #f59e0b;">0</div>
+                            <!-- Accuracy -->
+                            <div style="padding: 3px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.1)); border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3); text-align: center;" data-tooltip="Successful hits out of all attacks launched">
+                                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">🎯 Accuracy</div>
+                                <div id="battAccuracy" style="font-weight: 700; font-size: 0.95rem; color: #22c55e;">0%</div>
                             </div>
                         </div>
                         
                         <!-- Secondary Stats Row 2 -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                            <!-- Shield -->
-                            <div style="padding: 12px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1)); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3); text-align: center;">
-                                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">🛡️ Shield</div>
-                                <div id="battleShieldHP" style="font-weight: 700; font-size: 0.95rem; color: #3b82f6;">100%</div>
+                            <!-- Attacks Sent -->
+                            <div style="padding: 3px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(59, 130, 246, 0.1)); border-radius: 8px; border: 1px solid rgba(99, 102, 241, 0.3); text-align: center;" data-tooltip="Total attacks launched in this session (hits + misses)">
+                                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">⚡ Attacks</div>
+                                <div id="attacksSent" style="font-weight: 700; font-size: 0.95rem; color: #6366f1;">0</div>
                             </div>
-                            <!-- Destroyed -->
-                            <div style="padding: 12px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.1)); border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3); text-align: center;">
-                                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">🎯 Destroyed</div>
-                                <div id="battleDestroyedCount" style="font-weight: 700; font-size: 0.95rem; color: #22c55e;">0</div>
+                            <!-- Score -->
+                            <div style="padding: 3px; background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(139, 92, 246, 0.1)); border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.3); text-align: center;" data-tooltip="Current points available to spend on attacks and upgrades">
+                                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">⭐ Score</div>
+                                <div id="personalScore" style="font-weight: 700; font-size: 0.95rem; color: var(--primary);">0</div>
                             </div>
-                            <!-- Win Rate -->
-                            <div style="padding: 12px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1)); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3); text-align: center;">
-                                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">💪 Win Rate</div>
-                                <div id="battleWinRate" style="font-weight: 700; font-size: 0.95rem; color: #ef4444;">0%</div>
+                            <!-- Points Spent -->
+                            <div style="padding: 3px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1)); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3); text-align: center;" data-tooltip="Total points spent on attacks in this session">
+                                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">💸 Spent</div>
+                                <div id="pointsSpent" style="font-weight: 700; font-size: 0.95rem; color: #ef4444;">0</div>
                             </div>
                         </div>
                         
@@ -2903,7 +2968,7 @@
                     </div>
 
                     <!-- Battle Feed -->
-                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border); flex: 1; min-height: 200px; display: flex; flex-direction: column;">
+                    <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 6px; border: 1px solid var(--border); flex: 1; min-height: 120px; display: flex; flex-direction: column;" data-tooltip="Battle feed: recent attacks, kills, and notifications">
                         <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">📣 BATTLE FEED</div>
                         <div id="battleFeed" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 4px;">
                             <div style="color: var(--text-tertiary); text-align: center; padding: 20px; font-size: 0.75rem;">No recent activity</div>
@@ -2914,7 +2979,7 @@
                 <!-- STATS TAB -->
                 <div class="tab-panel" data-panel="stats" style="display: none;">
                     <!-- Live Stats Grid -->
-                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border);">
+                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border);" data-tooltip="Live stats updated from the server in real time">
                         <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">📊 LIVE STATISTICS</div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                             <div style="background: rgba(59, 130, 246, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #3b82f6;">
@@ -2936,8 +3001,31 @@
                         </div>
                     </div>
 
+                    <!-- Session Performance Stats -->
+                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border);" data-tooltip="Your performance metrics this session">
+                        <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">🎯 SESSION PERFORMANCE</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div style="background: rgba(99, 102, 241, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #6366f1;">
+                                <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Accuracy</div>
+                                <div style="color: #6366f1; font-weight: 700; font-size: 1.5rem;" id="statAccuracy">0%</div>
+                            </div>
+                            <div style="background: rgba(245, 158, 11, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                                <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Avg Damage</div>
+                                <div style="color: #f59e0b; font-weight: 700; font-size: 1.5rem;" id="statAvgDamage">0</div>
+                            </div>
+                            <div style="background: rgba(34, 197, 94, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #22c55e;">
+                                <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Kill/Death</div>
+                                <div style="color: #22c55e; font-weight: 700; font-size: 1.5rem;" id="statKD">0.0</div>
+                            </div>
+                            <div style="background: rgba(168, 85, 247, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #a855f7;">
+                                <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Points Earned</div>
+                                <div style="color: #a855f7; font-weight: 700; font-size: 1.5rem;" id="statPointsEarned">0</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Player Leaderboard -->
-                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border); flex: 1; min-height: 200px; display: flex; flex-direction: column;">
+                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border); flex: 1; min-height: 200px; display: flex; flex-direction: column;" data-tooltip="Top players leaderboard (live updates)">
                         <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">👑 TOP PLAYERS</div>
                         <div id="userLeaderboard" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;">
                             <p class="loading" style="text-align: center; color: var(--text-tertiary); padding: 20px; font-size: 0.75rem;">Loading players...</p>
@@ -2945,7 +3033,7 @@
                     </div>
 
                     <!-- Country Leaderboard -->
-                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border); flex: 1; min-height: 200px; display: flex; flex-direction: column;">
+                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border); flex: 1; min-height: 200px; display: flex; flex-direction: column;" data-tooltip="Top countries leaderboard (live updates)">
                         <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">🏆 COUNTRY LEADERBOARD</div>
                         <div id="countryLeaderboard" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;">
                             <p class="loading" style="text-align: center; color: var(--text-tertiary); padding: 20px; font-size: 0.75rem;">Collecting data...</p>
@@ -2959,7 +3047,7 @@
                 <div class="tab-panel" data-panel="settings" style="display: none; flex-direction: column; gap: 12px; overflow-y: auto; padding: 8px;">
                     <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 14px; border: 1px solid var(--border);" data-tooltip="Switch between dark and light themes">
                         <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; color: var(--text-primary);">🌙 THEME</div>
-                        <label class="pulse-toggle" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer;">
+                        <label class="pulse-toggle" data-tooltip="Switch between dark and light theme" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer;">
                             <span style="flex: 1; font-size: 0.85rem;">Dark mode</span>
                             <div style="position: relative; flex-shrink: 0;">
                                 <input type="checkbox" id="themeToggle" checked style="display: none;">
@@ -2970,8 +3058,8 @@
 
                     <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 14px; border: 1px solid var(--border);" data-tooltip="Toggle sound effects for attacks and events">
                         <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; color: var(--text-primary);">🔊 SOUND EFFECTS</div>
-                        <label class="pulse-toggle" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer;">
-                            <span style="flex: 1; font-size: 0.85rem;">Play sounds for actions</span>
+                        <label class="pulse-toggle" data-tooltip="Enable or disable sound effects" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer;">
+                            <span style="flex: 1; font-size: 0.85rem;">Play sounds</span>
                             <div style="position: relative; flex-shrink: 0;">
                                 <input type="checkbox" id="soundToggle" checked style="display: none;">
                                 <span class="toggle-track"></span>
@@ -2979,20 +3067,9 @@
                         </label>
                     </div>
 
-                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 14px; border: 1px solid var(--border);" data-tooltip="Receive notifications about attacks on your beacons">
-                        <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; color: var(--text-primary);">📢 NOTIFICATIONS</div>
-                        <label class="pulse-toggle" style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                            <span style="flex: 1;">Show battle notifications</span>
-                            <div style="position: relative; flex-shrink: 0;">
-                                <input type="checkbox" id="notificationsToggle" checked style="display: none;">
-                                <span class="toggle-track"></span>
-                            </div>
-                        </label>
-                    </div>
-
                     <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 14px; border: 1px solid var(--border);" data-tooltip="Reduce visual effects for better performance on slower devices">
                         <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; color: var(--text-primary);">⚡ PERFORMANCE</div>
-                        <label class="pulse-toggle" style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                        <label class="pulse-toggle" data-tooltip="Reduce visual effects for smoother performance" style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
                             <span style="flex: 1;">Reduce animations</span>
                             <div style="position: relative; flex-shrink: 0;">
                                 <input type="checkbox" id="performanceToggle" style="display: none;">
@@ -3003,23 +3080,23 @@
 
                     <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 14px; border: 1px solid var(--border);" data-tooltip="Warning: This will permanently delete all your local progress">
                         <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; color: var(--text-primary);">🗑️ RESET DATA</div>
-                        <button id="resetDataBtn" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; font-weight: 600; cursor: pointer;">Clear All Local Data</button>
+                        <button id="resetDataBtn" data-tooltip="Permanently erase saved stats, streaks, and preferences on this device" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; font-weight: 600; cursor: pointer;">Clear All Local Data</button>
                         <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-top: 6px;">This will reset your stats and preferences</div>
                     </div>
 
                     <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 14px; border: 1px solid var(--border);" data-tooltip="Share your achievements on social media">
                         <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; color: var(--text-primary);">🎯 SHARE STATS</div>
-                        <button id="shareBtn" style="width: 100%; padding: 10px; border: 1px solid var(--primary); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s;">📤 Share Score</button>
+                        <button id="shareBtn" data-tooltip="Share your current score, kills, and accuracy" style="width: 100%; padding: 10px; border: 1px solid var(--primary); background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s;">📤 Share Score</button>
                     </div>
 
                     <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 14px; border: 1px solid var(--border);">
                         <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 10px; color: var(--text-primary);">ℹ️ ABOUT</div>
                         <div style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.6;">
-                            <div><strong>GlobalPulseMap v1.0</strong></div>
-                            <div>Real-time global pulse arena</div>
+                            <div><strong>GlobalAttackMap v1.0</strong></div>
+                            <div>Real-time global attack arena</div>
                             <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);">
                                 <div>📊 Sessions: <strong id="statSessions">0</strong></div>
-                                <div>💓 Total Pulses: <strong id="statPulses">0</strong></div>
+                                <div>💥 Total Attacks: <strong id="statPulses">0</strong></div>
                                 <div>💀 Total Kills: <strong id="statKills">0</strong></div>
                             </div>
                         </div>
@@ -3030,23 +3107,48 @@
                 <!-- HELP TAB -->
                 <div class="tab-panel" data-panel="help" style="display: none; flex-direction: column; gap: 12px; overflow-y: auto; padding: 8px;">
                     <div style="padding: 14px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #3b82f6;">
-                        <h3 style="margin: 0 0 8px 0; color: #3b82f6; font-size: 0.95rem;">1. 📡 Deploy Beacons</h3>
-                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.8rem;">Click the "Deploy Beacon" button to place your point on the map. Each beacon becomes a potential battle target that others can attack.</p>
+                        <h3 style="margin: 0 0 8px 0; color: #3b82f6; font-size: 0.95rem;">1. 🎯 Deploy Beacons</h3>
+                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.8rem;">Click "Deploy Beacon" to place your marker on the map. Each beacon becomes a battle target for other players.</p>
+                    </div>
+
+                    <div style="padding: 14px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #0ea5e9;">
+                        <h3 style="margin: 0 0 8px 0; color: #0ea5e9; font-size: 0.95rem;">2. 🧭 Select Target & Range</h3>
+                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.8rem;">Click a target on the map to see its age, distance, and value. Choose a range (500km, 1000km, 4000km, or Global) to filter which targets are valid.</p>
                     </div>
 
                     <div style="padding: 14px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #ef4444;">
-                        <h3 style="margin: 0 0 8px 0; color: #ef4444; font-size: 0.95rem;">2. ⚔️ Attack Targets</h3>
-                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.8rem;">Select a beacon on the map, then click ATTACK. Choose between Pulse (cheap), Laser (balanced), or EMP (powerful) attacks. Each attack costs points!</p>
+                        <h3 style="margin: 0 0 8px 0; color: #ef4444; font-size: 0.95rem;">3. ⚔️ Launch Attacks</h3>
+                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.8rem;">Pick an attack type, then hit ATTACK. Each attack has a cooldown and a cost, so timing matters.</p>
                     </div>
 
                     <div style="padding: 14px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #22c55e;">
-                        <h3 style="margin: 0 0 8px 0; color: #22c55e; font-size: 0.95rem;">3. 💎 Earn Points</h3>
-                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.8rem;">Destroy targets to earn 10-70 points based on their age. Older targets = more points! Use points for attacks and defense upgrades.</p>
+                        <h3 style="margin: 0 0 8px 0; color: #22c55e; font-size: 0.95rem;">4. 💎 Points & Score</h3>
+                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.8rem;">Destroying targets earns points based on target age and defenses. Spend points to launch stronger attacks or upgrade defenses.</p>
                     </div>
 
                     <div style="padding: 14px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #8b5cf6;">
-                        <h3 style="margin: 0 0 8px 0; color: #8b5cf6; font-size: 0.95rem;">4. 🛡️ Build Defenses</h3>
-                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.8rem;">Upgrade your Shield (HP), Armor (damage reduction), and Interceptors (block chance) to protect your beacons from enemy attacks.</p>
+                        <h3 style="margin: 0 0 8px 0; color: #8b5cf6; font-size: 0.95rem;">5. 🛡️ Build Defenses</h3>
+                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.8rem;">Upgrade Shield (extra HP), Armor (damage reduction), and Interceptors (block chance) to protect your beacons.</p>
+                    </div>
+
+                    <div style="padding: 14px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #f59e0b;">
+                        <h3 style="margin: 0 0 8px 0; color: #f59e0b; font-size: 0.95rem;">6. 🚀 Interceptors & Shield Recharge</h3>
+                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.8rem;">Interceptors can auto-block incoming attacks and recharge over time. Shields recharge after a short delay once damage stops.</p>
+                    </div>
+
+                    <div style="padding: 14px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #22c55e;">
+                        <h3 style="margin: 0 0 8px 0; color: #22c55e; font-size: 0.95rem;">7. 📊 Battle Stats</h3>
+                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.8rem;">Track Session time, Kills, Avg DMG, Accuracy, Attacks sent, Score, and Points spent. Hover each stat for details.</p>
+                    </div>
+
+                    <div style="padding: 14px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #8b5cf6;">
+                        <h3 style="margin: 0 0 8px 0; color: #8b5cf6; font-size: 0.95rem;">8. 📣 Battle Feed</h3>
+                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.8rem;">The feed shows recent attacks, kills, and key events with attack type and damage.</p>
+                    </div>
+
+                    <div style="padding: 14px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #ef4444;">
+                        <h3 style="margin: 0 0 8px 0; color: #ef4444; font-size: 0.95rem;">9. 🤖 Auto-Agents & Cooldowns</h3>
+                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.8rem;">Auto-agents also attack on the map. After you launch an attack, a short cooldown runs before you can attack again.</p>
                     </div>
 
                     <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border);">
@@ -3055,7 +3157,7 @@
                             <div style="display: flex; align-items: start; gap: 8px; padding: 8px; background: var(--bg-secondary); border-radius: 6px;">
                                 <span style="font-size: 1.2rem;">📡</span>
                                 <div>
-                                    <div style="font-weight: 600;">Pulse</div>
+                                    <div style="font-weight: 600;">Attack</div>
                                     <div style="color: var(--text-tertiary);">FREE • 15 damage • 2s cooldown</div>
                                 </div>
                             </div>
@@ -3131,9 +3233,9 @@
                         <ul style="margin: 0; padding-left: 20px; color: var(--text-secondary); line-height: 1.8; font-size: 0.75rem;">
                             <li>Attack older targets for maximum points</li>
                             <li>Balance spending between attacks and defense</li>
-                            <li>Use different attack ranges to find vulnerable targets</li>
-                            <li>Upgrade defenses early to protect your beacons</li>
-                            <li>Watch the battle feed for real-time action</li>
+                            <li>Use range filters to find vulnerable targets</li>
+                            <li>Upgrade defenses early to survive auto-agent raids</li>
+                            <li>Hover any stat or button for detailed help</li>
                         </ul>
                     </div>
                 </div>
@@ -3159,7 +3261,7 @@
             <!-- Battle Cooldown (hidden by default) -->
             <div id="battleCooldown" class="pulse-cooldown" style="display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 501;">
                 <div class="cooldown-label">⚔️ Attack in progress...</div>
-                <div class="cooldown-time" id="cooldownTimer">30s</div>
+                <div class="cooldown-time" id="cooldownTimer">—</div>
             </div>
 
             <!-- Target Info Panel (hidden by default) -->
@@ -3236,7 +3338,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <div style="font-weight: 600; margin-bottom: 4px;">🔊 Sound Effects</div>
-                            <div style="font-size: 0.8rem; color: var(--text-tertiary);">Play sounds for actions and events</div>
+                            <div style="font-size: 0.8rem; color: var(--text-tertiary);">Play sounds</div>
                         </div>
                         <label class="pulse-toggle" style="margin: 0;">
                             <input type="checkbox" checked style="display: none;">
@@ -3301,23 +3403,28 @@
             
             <div style="display: flex; flex-direction: column; gap: 20px;">
                 <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #3b82f6;">
-                    <h3 style="margin: 0 0 8px 0; color: #3b82f6;">1. 📡 Deploy Beacons</h3>
-                    <p style="margin: 0; color: var(--text-secondary); line-height: 1.6;">Click the "Deploy Beacon" button to place your point on the map. Each beacon becomes a potential battle target that others can attack.</p>
+                    <h3 style="margin: 0 0 8px 0; color: #3b82f6;">1. 🎯 Deploy Beacons</h3>
+                    <p style="margin: 0; color: var(--text-secondary); line-height: 1.6;">Click "Deploy Beacon" to place your marker on the map. Each beacon becomes a target.</p>
+                </div>
+
+                <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #0ea5e9;">
+                    <h3 style="margin: 0 0 8px 0; color: #0ea5e9;">2. 🧭 Range & Targeting</h3>
+                    <p style="margin: 0; color: var(--text-secondary); line-height: 1.6;">Select a target on the map, then choose range (500km, 1000km, 4000km, Global) to filter valid targets.</p>
                 </div>
 
                 <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #ef4444;">
-                    <h3 style="margin: 0 0 8px 0; color: #ef4444;">2. ⚔️ Attack Targets</h3>
-                    <p style="margin: 0; color: var(--text-secondary); line-height: 1.6;">Select a beacon on the map, then click ATTACK. Choose between Pulse (cheap), Laser (balanced), or EMP (powerful) attacks. Each attack costs points!</p>
+                    <h3 style="margin: 0 0 8px 0; color: #ef4444;">3. ⚔️ Launch Attacks</h3>
+                    <p style="margin: 0; color: var(--text-secondary); line-height: 1.6;">Pick an attack type, then click ATTACK. Each attack has a cooldown and a cost.</p>
                 </div>
 
                 <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #22c55e;">
-                    <h3 style="margin: 0 0 8px 0; color: #22c55e;">3. 💎 Earn Points</h3>
-                    <p style="margin: 0; color: var(--text-secondary); line-height: 1.6;">Destroy targets to earn 10-70 points based on their age. Older targets = more points! Use points for attacks and defense upgrades.</p>
+                    <h3 style="margin: 0 0 8px 0; color: #22c55e;">4. 💎 Points & Score</h3>
+                    <p style="margin: 0; color: var(--text-secondary); line-height: 1.6;">Destroy targets to earn points based on target age and defenses. Spend points on stronger attacks or upgrades.</p>
                 </div>
 
                 <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #8b5cf6;">
-                    <h3 style="margin: 0 0 8px 0; color: #8b5cf6;">4. 🛡️ Build Defenses</h3>
-                    <p style="margin: 0; color: var(--text-secondary); line-height: 1.6;">Upgrade your Shield (HP), Armor (damage reduction), and Interceptors (block chance) to protect your beacons from enemy attacks.</p>
+                    <h3 style="margin: 0 0 8px 0; color: #8b5cf6;">5. 🛡️ Build Defenses</h3>
+                    <p style="margin: 0; color: var(--text-secondary); line-height: 1.6;">Upgrade Shield (HP), Armor (damage reduction), and Interceptors (block chance) to protect your beacons.</p>
                 </div>
 
                 <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 12px;">
@@ -3326,25 +3433,30 @@
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span style="font-size: 1.2rem;">📡</span>
                             <div style="flex: 1;">
-                                <div style="font-weight: 600;">Pulse</div>
-                                <div style="font-size: 0.8rem; color: var(--text-tertiary);">3 pts • 15 damage • 2s cooldown</div>
+                                <div style="font-weight: 600;">Attack</div>
+                                <div style="font-size: 0.8rem; color: var(--text-tertiary);">FREE • 15 damage • 2s cooldown</div>
                             </div>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span style="font-size: 1.2rem;">⚡</span>
                             <div style="flex: 1;">
                                 <div style="font-weight: 600;">Laser</div>
-                                <div style="font-size: 0.8rem; color: var(--text-tertiary);">15 pts • 35 damage • 6s cooldown</div>
+                                <div style="font-size: 0.8rem; color: var(--text-tertiary);">10 pts • 35 damage • 6s cooldown</div>
                             </div>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span style="font-size: 1.2rem;">💥</span>
                             <div style="flex: 1;">
                                 <div style="font-weight: 600;">EMP</div>
-                                <div style="font-size: 0.8rem; color: var(--text-tertiary);">35 pts • 60 damage • 12s cooldown</div>
+                                <div style="font-size: 0.8rem; color: var(--text-tertiary);">25 pts • 60 damage • 12s cooldown</div>
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 12px;">
+                    <h3 style="margin: 0 0 12px 0;">📊 Battle Stats & Feed</h3>
+                    <p style="margin: 0; color: var(--text-secondary); line-height: 1.6;">Hover any stat for details. The Battle Feed shows recent attacks, kills, and bonuses.</p>
                 </div>
 
                 <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 12px;">
@@ -3407,46 +3519,74 @@
             overflow-y: auto;
         }
 
-        /* Mobile Responsive Layout */
+        .command-center button {
+            padding-top: 6px !important;
+            padding-bottom: 6px !important;
+        }
+
+        .command-center .battle-attack-btn,
+        .command-center .defense-upgrade-btn {
+            padding-top: 8px !important;
+            padding-bottom: 8px !important;
+        }
+
         @media (max-width: 768px) {
             .split-container {
                 flex-direction: column !important;
             }
+            
+            .map-container {
+                order: -1;
+                flex: 0 0 35dvh;
+                min-height: 240px;
+            }
+            
             .command-center {
                 width: 100% !important;
-                height: 50% !important;
+                flex: 1;
+                min-height: 0;
                 border-right: none !important;
-                border-bottom: 1px solid var(--border) !important;
+                border-bottom: none !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
             }
+            
             .ad-panel {
                 width: 100% !important;
-                height: 50% !important;
+                flex: 1;
                 border-right: none !important;
-                border-bottom: 1px solid var(--border) !important;
+                border-bottom: none !important;
             }
-            .map-container {
-                width: 100% !important;
-                height: 50% !important;
+            
+            .command-center > div[style*="padding: 12px"],
+            .command-center > div[style*="padding: 14px"] {
+                padding: 6px !important;
+                gap: 4px !important;
             }
-            .main-action-btn {
-                bottom: 12px !important;
-                font-size: 0.9rem !important;
-                padding: 12px 20px !important;
-                min-width: 160px !important;
-                height: 40px !important;
+            
+            .command-content {
+                padding: 4px !important;
+                gap: 4px !important;
             }
-            .pulse-cooldown {
-                /* Keep same size as desktop for consistency */
-                bottom: 20px !important;
-                padding: 14px 28px !important;
-                min-width: 200px !important;
-                height: 48px !important;
+            
+            .command-content > div {
+                padding: 6px !important;
+                margin-bottom: 2px !important;
             }
+            
             .pulse-cooldown .cooldown-time {
                 font-size: 1.3rem !important;
             }
             .cooldown-label {
                 font-size: 0.6rem !important;
+            }
+            
+            .main-action-btn {
+                bottom: 10px !important;
+                font-size: 0.9rem !important;
+                padding: 10px 18px !important;
+                min-width: 140px !important;
+                height: 36px !important;
             }
             
             /* Mobile Header Optimization */
@@ -3495,10 +3635,6 @@
             
             #userName {
                 font-size: 0.65rem !important;
-            }
-            
-            #userCountryScore {
-                font-size: 0.55rem !important;
             }
             
             #loginBtn, #logoutBtn {
@@ -3557,7 +3693,13 @@
             cursor: help;
         }
         
-        [data-tooltip]:hover::before {
+        /* Disable parent tooltips when hovering child buttons */
+        [data-tooltip]:has(button:hover)::before,
+        [data-tooltip]:has(button:hover)::after {
+            display: none;
+        }
+
+        [data-tooltip]::before {
             content: attr(data-tooltip);
             position: absolute;
             bottom: 100%;
@@ -3576,9 +3718,12 @@
             border: 1px solid var(--border);
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             line-height: 1.4;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
         }
-        
-        [data-tooltip]:hover::after {
+
+        [data-tooltip]::after {
             content: '';
             position: absolute;
             bottom: 100%;
@@ -3588,6 +3733,15 @@
             border-top-color: rgba(17, 24, 39, 0.95);
             z-index: 10000;
             pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+        }
+
+        [data-tooltip].show-tooltip::before,
+        [data-tooltip].show-tooltip::after {
+            opacity: 1;
+            visibility: visible;
         }
 
         /* Tab switching */
@@ -3605,11 +3759,20 @@
             gap: 12px;
         }
 
+        /* Attack button styles */
+        .battle-attack-btn {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 2px solid rgba(255, 255, 255, 0.2) !important;
+            color: rgba(255, 255, 255, 0.6) !important;
+            opacity: 0.7;
+        }
+
         /* Attack button active state */
         .battle-attack-btn.active {
             background: rgba(59, 130, 246, 0.3) !important;
             border-color: #3b82f6 !important;
             color: #3b82f6 !important;
+            opacity: 1;
         }
         .battle-attack-btn.active[data-type="laser"] {
             background: rgba(239, 68, 68, 0.3) !important;
@@ -3653,5 +3816,122 @@
         }
     </style>
 
+<!-- Tooltip System Scripts -->
+    <script>
+        // Tooltip delay system - show after 2 seconds of mouse hovering (no movement)
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipElements = document.querySelectorAll('[data-tooltip]');
+            const TOOLTIP_DELAY = 2000;
+            const MOVE_TOLERANCE = 2;
+
+            function setupTooltipListener(element) {
+                if (element.__tooltipListenerAdded) return;
+                element.__tooltipListenerAdded = true;
+
+                let hover = false;
+                let lastMoveTime = 0;
+                let lastPos = null;
+                let tooltipTimeout = null;
+
+                const clearTimer = () => {
+                    if (tooltipTimeout) {
+                        clearTimeout(tooltipTimeout);
+                        tooltipTimeout = null;
+                    }
+                };
+
+                const scheduleTooltip = () => {
+                    clearTimer();
+                    tooltipTimeout = setTimeout(() => {
+                        if (!hover) return;
+                        if (element.querySelector('button:hover')) {
+                            scheduleTooltip();
+                            return;
+                        }
+                        if (Date.now() - lastMoveTime >= TOOLTIP_DELAY) {
+                            element.classList.add('show-tooltip');
+                        } else {
+                            scheduleTooltip();
+                        }
+                    }, TOOLTIP_DELAY);
+                };
+
+                element.addEventListener('mouseenter', function(e) {
+                    hover = true;
+                    element.classList.remove('show-tooltip');
+                    lastMoveTime = Date.now();
+                    lastPos = { x: e.clientX, y: e.clientY };
+                    scheduleTooltip();
+                });
+
+                element.addEventListener('mousemove', function(e) {
+                    if (!hover) return;
+                    if (!lastPos) {
+                        lastPos = { x: e.clientX, y: e.clientY };
+                        lastMoveTime = Date.now();
+                        return;
+                    }
+                    const dx = Math.abs(e.clientX - lastPos.x);
+                    const dy = Math.abs(e.clientY - lastPos.y);
+                    if (dx > MOVE_TOLERANCE || dy > MOVE_TOLERANCE) {
+                        lastMoveTime = Date.now();
+                        lastPos = { x: e.clientX, y: e.clientY };
+                    }
+                });
+
+                element.addEventListener('mouseleave', function() {
+                    hover = false;
+                    clearTimer();
+                    element.classList.remove('show-tooltip');
+                    lastPos = null;
+                });
+
+                element.addEventListener('focus', function() {
+                    hover = true;
+                    element.classList.remove('show-tooltip');
+                    lastMoveTime = Date.now();
+                    scheduleTooltip();
+                });
+
+                element.addEventListener('blur', function() {
+                    hover = false;
+                    clearTimer();
+                    element.classList.remove('show-tooltip');
+                });
+            }
+            
+            // Setup listeners for all [data-tooltip] elements
+            tooltipElements.forEach(element => {
+                setupTooltipListener(element);
+            });
+            
+            // Use MutationObserver to handle dynamically added elements
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.addedNodes.length) {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === 1) { // Element node
+                                if (node.hasAttribute && node.hasAttribute('data-tooltip')) {
+                                    setupTooltipListener(node);
+                                }
+                                // Also check children
+                                const children = node.querySelectorAll?.('[data-tooltip]');
+                                if (children) {
+                                    children.forEach(child => {
+                                        setupTooltipListener(child);
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+            
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        });
+    </script>
 </body>
 </html>

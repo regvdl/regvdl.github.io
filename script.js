@@ -1,4 +1,4 @@
-// Script loaded marker
+// Script loaded marker - Updated 2026-02-05 15:10
 window.__gpScriptLoaded = true;
 
 // ===== Tab System =====
@@ -65,14 +65,21 @@ function initCommandCenter() {
 }
 
 // ===== Ad Overlay System =====
-function showAdOverlay() {
+function showAdOverlay(duration = 30) {
     const commandCenter = document.querySelector('.command-center');
-    const adPanel = document.getElementById('adPanel');
+        const adPanel = document.getElementById('adPanel'); // Get ad panel element
     const adContent = document.getElementById('adContent');
     
     if (!adPanel || !commandCenter) {
         console.warn('⚠️ Ad panel or command center not found');
         return;
+    }
+    
+    // Save state to localStorage
+    try {
+        localStorage.setItem('adOverlayVisible', 'true');
+    } catch (e) {
+        console.warn('⚠️ Could not save ad overlay state:', e);
     }
     
     // Load ad content with Google AdSense
@@ -82,7 +89,7 @@ function showAdOverlay() {
         const slotId = `gpt-ad-attack-${timestamp}`;
         
         adContent.innerHTML = `
-            <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px;">
+            <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; gap: 14px;">
                 <!-- Google AdSense Ad Unit -->
                 <ins class="adsbygoogle"
                      style="display:block; width:100%; height:100%; margin: auto;"
@@ -90,6 +97,7 @@ function showAdOverlay() {
                      data-ad-slot="1234567890"
                      data-ad-format="auto"
                      data-full-width-responsive="true"></ins>
+                <div id="adTimer" style="font-size: 2.4rem; font-weight: bold; color: var(--primary);">${Math.ceil(duration)}s</div>
             </div>
         `;
         
@@ -104,7 +112,7 @@ function showAdOverlay() {
                 <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center;">
                     <h2 style="font-size: 1.8rem; margin-bottom: 20px;">🚀 Attack in Progress!</h2>
                     <div style="font-size: 1.3rem; margin-bottom: 30px; color: var(--text-secondary);">Your missile is flying...</div>
-                    <div id="adTimer" style="font-size: 3rem; font-weight: bold; color: var(--primary); margin-bottom: 40px;">30s</div>
+                    <div id="adTimer" style="font-size: 3rem; font-weight: bold; color: var(--primary); margin-bottom: 40px;">${Math.ceil(duration)}s</div>
                 </div>
             `;
         }
@@ -137,6 +145,13 @@ function hideAdOverlay() {
     
     if (!adPanel) return;
     
+    // Clear state from localStorage
+    try {
+        localStorage.removeItem('adOverlayVisible');
+    } catch (e) {
+        console.warn('⚠️ Could not clear ad overlay state:', e);
+    }
+    
     // Fade out ad panel
     adPanel.style.transition = 'opacity 0.5s ease';
     adPanel.style.opacity = '0';
@@ -163,8 +178,12 @@ function hideAdOverlay() {
 
 
 function startAdTimer(duration = 30) {
-    let remaining = duration;
+    let remaining = Math.ceil(duration);
     const timerElement = document.getElementById('adTimer');
+
+    if (timerElement) {
+        timerElement.textContent = `${remaining}s`;
+    }
     
     const interval = setInterval(() => {
         remaining--;
@@ -279,12 +298,37 @@ let countryScores = {}; // {countryCode: totalScore}
 let currentUser = null; // {provider, id, name, avatar, country}
 
 // Sound System (Modern Web Audio API with ADSR envelopes and effects)
-const soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+window.soundEnabled = soundEnabled;
+let audioContext = null;
+let audioContextInitialized = false;
+
+// Initialize audio context on first user interaction to comply with browser policy
+function ensureAudioContext() {
+    if (audioContextInitialized) return audioContext;
+    
+    try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        audioContextInitialized = true;
+        
+        // Resume context if suspended (browser requirement after user gesture)
+        if (audioContext.state === 'suspended') {
+            audioContext.resume().catch(e => console.warn('AudioContext resume failed:', e));
+        }
+        return audioContext;
+    } catch (e) {
+        console.warn('AudioContext creation failed:', e);
+        audioContextInitialized = true;
+        return null;
+    }
+}
 
 function playSound(soundName) {
     if (!soundEnabled) return;
     try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const context = ensureAudioContext();
+        if (!context) return;
+        const audioContext = context;
         const now = audioContext.currentTime;
         
         // Master gain
@@ -465,36 +509,8 @@ function playSound(soundName) {
     }
 }
 
-// Tutorial System
-const tutorialSteps = [
-    { id: 'welcome', title: 'Welcome to GlobalPulseMap!', description: 'Track and battle pulse points across the globe in real-time.' },
-    { id: 'pulse', title: 'Deploy Beacons', description: 'Click "Deploy Beacon" to place your point on the map. Each beacon becomes a battle target!' },
-    { id: 'attack', title: 'Attack Targets', description: 'Select a pulse on the map and click ATTACK to launch a strike. Earn points for destroying targets!' },
-    { id: 'defense', title: 'Build Defenses', description: 'Upgrade your Shield, Armor and Interceptors to protect your pulses from attacks.' },
-    { id: 'points', title: 'Earn & Spend Points', description: 'Destroy targets to earn points. Use points for attacks and defense upgrades.' }
-];
-let tutorialCompleted = localStorage.getItem('tutorialCompleted') === 'true';
-let currentTutorialStep = 0;
-
-function showTutorial() {
-    if (tutorialCompleted) return;
-    // Tutorial will be shown via modal
-    const step = tutorialSteps[currentTutorialStep];
-    if (step) {
-        showNotification(step.title, step.description, 'info', 5000);
-    }
-}
-
-function nextTutorialStep() {
-    currentTutorialStep++;
-    if (currentTutorialStep >= tutorialSteps.length) {
-        tutorialCompleted = true;
-        localStorage.setItem('tutorialCompleted', 'true');
-        showNotification('Tutorial Complete!', 'You\'re ready to conquer the world!', 'achievement', 3000);
-    } else {
-        showTutorial();
-    }
-}
+// Tutorial System - DISABLED
+// All tutorial popups have been removed
 
 // Notification System (improved)
 function showNotification(title, message, type = 'info', duration = 4000) {
@@ -573,30 +589,47 @@ const ATTACK_COOLDOWN_SECONDS = 30;
 // Attack Types System
 const ATTACK_TYPES = {
     pulse: {
-        name: '📡 Pulse',
+        name: '🚀 Scout',
         cost: 0,
         damage: 15,
         cooldown: 2,
-        description: 'FREE! Fast attack. Low risk.',
+        speedKps: 75,
+        rocketScale: 1.33,
+        description: 'Free. Slowest, but reliable.',
         color: '#3b82f6'
     },
     laser: {
-        name: '⚡ Laser',
+        name: '🚀 Arrow',
         cost: 10,
         damage: 35,
         cooldown: 6,
-        description: 'Medium cost. Higher damage.',
+        speedKps: 150,
+        rocketScale: 1.53,
+        description: 'Medium cost. Faster and stronger.',
         color: '#ef4444'
     },
     emp: {
-        name: '💥 EMP',
+        name: '🚀 Titan',
         cost: 25,
         damage: 60,
         cooldown: 12,
-        description: 'Expensive. Massive damage.',
+        speedKps: 300,
+        rocketScale: 1.73,
+        description: 'Expensive. Fastest and most powerful.',
         color: '#f59e0b'
     }
 };
+
+function getAttackSpeedKps(type) {
+    return ATTACK_TYPES[type]?.speedKps || ATTACK_TYPES.pulse.speedKps;
+}
+
+function calculateAttackDurationSec(type, fromLat, fromLon, toLat, toLon) {
+    const distanceKm = calculateDistance(fromLat, fromLon, toLat, toLon);
+    const speedKps = getAttackSpeedKps(type);
+    const rawSeconds = distanceKm / speedKps;
+    return Math.max(4, Math.ceil(rawSeconds));
+}
 
 let currentAttackType = 'pulse';
 let attackTypeCooldowns = {
@@ -656,14 +689,6 @@ let battleStats = {
 let trajectoryPolyline = null;
 let trajectoryAnimationFrameId = null;
 let rangeCircle = null;
-
-// Attack duration based on range
-const ATTACK_DURATIONS = {
-    500: 30,      // 30 seconds with ad
-    1000: 30,     // 30 seconds with ad
-    4000: 30,     // 30 seconds with ad
-    Infinity: 30  // 30 seconds with ad - global range
-};
 
 // Range system
 let currentBattleRange = 500; // km
@@ -743,14 +768,12 @@ function selectAttackType(type) {
     console.log(`⚡ Selected attack type: ${type}`);
     playSound('pulse');
     
-    // Update UI to show selection
+    // Update UI to show selection - use .active class instead of inline styles
     document.querySelectorAll('.battle-attack-btn').forEach(btn => {
         if (btn.dataset.type === type) {
-            btn.style.background = `linear-gradient(135deg, ${ATTACK_TYPES[type].color}40, ${ATTACK_TYPES[type].color}20)`;
-            btn.style.borderWidth = '2px';
+            btn.classList.add('active');
         } else {
-            btn.style.background = 'rgba(255, 255, 255, 0.05)';
-            btn.style.borderWidth = '1px';
+            btn.classList.remove('active');
         }
     });
     
@@ -835,12 +858,7 @@ function updateBattleUI() {
         }
     });
     
-    // Update target display
-    const targetDisplay = document.getElementById('battleTargetNameCompact');
-    if (targetDisplay && selectedTarget) {
-        const shortName = selectedTarget.name?.substring(0, 12) || 'Target';
-        targetDisplay.textContent = shortName;
-    }
+    // Update target display is handled by setBattleTarget to avoid overwriting HTML
     
     // Update range display
     const rangeDisplay = document.getElementById('battleRangeDisplay');
@@ -976,7 +994,7 @@ function updateLiveStats() {
     // Update attack count (from battle stats)
     const attackCountEl = document.getElementById('liveAttackCount');
     if (attackCountEl) {
-        attackCountEl.textContent = battleStats.attacksSent || 0;
+        attackCountEl.textContent = battleStats.totalAttacks || 0;
     }
     
     // Update kill count
@@ -1169,13 +1187,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         initUnifiedWidget();
         console.log('✅ Unified widget initialized');
         
-        // Show tutorial for first-time users
-        setTimeout(() => {
-            if (!tutorialCompleted) {
-                showTutorial();
-            }
-        }, 2000);
-        
         // Get all DOM elements
         pulseBtn = document.getElementById('pulseBtn');
         globalCountEl = document.getElementById('globalCount');
@@ -1225,7 +1236,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         setupLoginSystem();
         setupLogoutButton();
         startAdRefresh();
-        setupTargetInfoPanel();
         initializeDefenseSystems();
         initializeAdvancedBattleSystem();
         
@@ -1258,6 +1268,116 @@ document.addEventListener('DOMContentLoaded', async () => {
         const battleCooldown = document.getElementById('battleCooldown');
         if (battleCooldown) {
             battleCooldown.style.display = 'none';
+        }
+        
+        // Restore cooldown state if page was refreshed during cooldown
+        try {
+            const savedEndTime = localStorage.getItem('attackCooldownEndTime');
+            const savedActive = localStorage.getItem('attackCooldownActive');
+            if (savedActive === 'true' && savedEndTime) {
+                const endTime = parseInt(savedEndTime);
+                const remaining = endTime - Date.now();
+                if (remaining > 0) {
+                    console.log(`🔄 Restoring attack cooldown: ${Math.ceil(remaining / 1000)}s remaining`);
+                    attackCooldownActive = true;
+                    attackCooldownEndTime = endTime;
+                    
+                    // Show cooldown UI
+                    if (pulseBtn) {
+                        pulseBtn.style.display = 'none';
+                        pulseBtn.disabled = true;
+                    }
+                    if (battleCooldown) {
+                        battleCooldown.style.display = 'flex';
+                        const timerEl = battleCooldown.querySelector('#cooldownTimer');
+                        const labelEl = battleCooldown.querySelector('.cooldown-label');
+                        if (labelEl) {
+                            labelEl.textContent = '⚔️ Attack in progress...';
+                        }
+                    }
+                    const battleToggle = document.getElementById('battleToggle');
+                    if (battleToggle) {
+                        battleToggle.disabled = true;
+                    }
+                    
+                    // Start cooldown timer
+                    updateCooldownTimer();
+                    attackCooldownInterval = setInterval(() => {
+                        const stillRemaining = attackCooldownEndTime - Date.now();
+                        if (stillRemaining <= 0) {
+                            endAttackCooldown();
+                        } else {
+                            updateCooldownTimer();
+                        }
+                    }, 1000);
+                } else {
+                    // Cooldown expired, clear it
+                    localStorage.removeItem('attackCooldownEndTime');
+                    localStorage.removeItem('attackCooldownActive');
+                }
+            }
+        } catch (e) {
+            console.warn('⚠️ Could not restore cooldown state:', e);
+        }
+        
+        // Restore ad overlay state if page was refreshed during attack
+        try {
+            const adOverlayVisible = localStorage.getItem('adOverlayVisible');
+            if (adOverlayVisible === 'true') {
+                console.log('🔄 Restoring ad overlay state');
+                const commandCenter = document.querySelector('.command-center');
+                const adPanel = document.getElementById('adPanel');
+                const adContent = document.getElementById('adContent');
+                
+                if (commandCenter && adPanel) {
+                    commandCenter.style.display = 'none';
+                    commandCenter.style.opacity = '0';
+                    adPanel.style.display = 'flex';
+                    adPanel.style.opacity = '1';
+                    
+                    // Restore ad timer if cooldown is active
+                    const savedEndTime = localStorage.getItem('attackCooldownEndTime');
+                    if (savedEndTime && adContent) {
+                        const endTime = parseInt(savedEndTime);
+                        attackCooldownEndTime = endTime;
+                        attackCooldownActive = true;
+                        const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+                        
+                        // Show ad with timer
+                        adContent.innerHTML = `
+                            <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center;">
+                                <h2 style="font-size: 1.8rem; margin-bottom: 20px;">🚀 Attack in Progress!</h2>
+                                <div style="font-size: 1.3rem; margin-bottom: 30px; color: var(--text-secondary);">Your missile is flying...</div>
+                                <div id="adTimer" style="font-size: 3rem; font-weight: bold; color: var(--primary); margin-bottom: 40px;">${remaining}s</div>
+                            </div>
+                        `;
+                        
+                        // Start ad timer countdown
+                        const timerInterval = setInterval(() => {
+                            const adTimer = document.getElementById('adTimer');
+                            if (!adTimer) {
+                                clearInterval(timerInterval);
+                                return;
+                            }
+                            const timeLeft = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+                            adTimer.textContent = `${timeLeft}s`;
+                            
+                            if (timeLeft <= 0) {
+                                clearInterval(timerInterval);
+                                if (attackCooldownActive) {
+                                    endAttackCooldown();
+                                } else {
+                                    hideAdOverlay();
+                                }
+                            }
+                        }, 1000);
+                        
+                        console.log(`🔄 Ad timer restored: ${remaining}s remaining`);
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('⚠️ Could not restore ad overlay state:', e);
         }
         
         // Load external libs and then initialize realtime/map
@@ -1351,52 +1471,74 @@ function ensureLeaflet() {
 }
 
 // ============ Theme Setup ============
-function setupTheme() {
-    console.log('🎨 Setting up theme...');
-    if (!themeBtn) {
-        console.warn('⚠️ Theme button not found');
-        return;
+function applyTheme(theme) {
+    if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
     }
-    
-    // Load saved theme
+    updateThemeButton();
+    updateThemeControls(theme);
+    updateThemeLabel(theme);
     try {
-        const savedTheme = localStorage.getItem('theme');
-        console.log('Saved theme:', savedTheme);
-        if (savedTheme === 'light') {
-            document.documentElement.setAttribute('data-theme', 'light');
-        } else {
-            document.documentElement.removeAttribute('data-theme');
-        }
+        localStorage.setItem('theme', theme);
+        console.log('💾 Theme saved:', theme);
     } catch (e) {
         console.log('localStorage error:', e);
     }
-    
-    // Theme button in header (if exists)
+}
+
+function toggleThemeMode() {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    applyTheme(isLight ? 'dark' : 'light');
+}
+
+function updateThemeControls(theme) {
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.checked = theme === 'light';
+    }
+}
+
+function updateThemeLabel(theme) {
+    const themeLabel = document.querySelector('.pulse-toggle span:first-child');
+    if (themeLabel) {
+        themeLabel.textContent = theme === 'light' ? 'Light mode' : 'Dark mode';
+    }
+}
+
+function setupTheme() {
+    console.log('🎨 Setting up theme...');
+    let savedTheme = 'dark';
+    try {
+        savedTheme = localStorage.getItem('theme') || 'dark';
+        console.log('Saved theme:', savedTheme);
+    } catch (e) {
+        console.log('localStorage error:', e);
+    }
+
+    applyTheme(savedTheme === 'light' ? 'light' : 'dark');
+
     if (themeBtn) {
-        updateThemeButton();
-        
-        // Add click handler
         themeBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             console.log('🌙 Theme button clicked!');
-            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-            if (isLight) {
-                document.documentElement.removeAttribute('data-theme');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'light');
-            }
-            updateThemeButton();
-            
-            try {
-                const isLightNow = document.documentElement.getAttribute('data-theme') === 'light';
-                localStorage.setItem('theme', isLightNow ? 'light' : 'dark');
-                console.log('💾 Theme saved:', isLightNow ? 'light' : 'dark');
-            } catch (e) {
-                console.log('localStorage error:', e);
-            }
+            toggleThemeMode();
         });
         console.log('✅ Theme button setup complete');
+    }
+    
+    // Make logo and title clickable to refresh
+    const logoElement = document.querySelector('.brand');
+    if (logoElement) {
+        logoElement.style.cursor = 'pointer';
+        logoElement.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🏠 Logo clicked - refreshing page');
+            window.location.href = '/';
+        });
     }
 }
 
@@ -1438,11 +1580,18 @@ function updateGeoButtonVisibility(state) {
 function setupSettingsButtons() {
     const themeBtnSettings = document.getElementById('themeBtnSettings');
     const geoBtnSettings = document.getElementById('geoBtnSettings');
+    const themeToggle = document.getElementById('themeToggle');
     
     if (themeBtnSettings) {
         themeBtnSettings.addEventListener('click', (e) => {
             e.preventDefault();
-            toggleTheme();
+            toggleThemeMode();
+        });
+    }
+
+    if (themeToggle) {
+        themeToggle.addEventListener('change', () => {
+            applyTheme(themeToggle.checked ? 'light' : 'dark');
         });
     }
     
@@ -1482,9 +1631,20 @@ function setupRangeSystem() {
         btn.addEventListener('click', () => {
             const range = btn.dataset.range;
             
-            // Update UI
-            rangeBtns.forEach(b => b.classList.remove('active'));
+            // Update all buttons: remove active from all, then add to clicked
+            rangeBtns.forEach(b => {
+                b.classList.remove('active');
+                // Reset all button styles to inactive
+                b.style.background = 'var(--bg-secondary)';
+                b.style.borderColor = 'var(--border)';
+                b.style.color = 'var(--text-secondary)';
+            });
+            
+            // Activate only the clicked button
             btn.classList.add('active');
+            btn.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
+            btn.style.borderColor = 'var(--primary)';
+            btn.style.color = 'white';
             
             // Update state
             currentBattleRange = range === 'global' ? Infinity : parseInt(range);
@@ -1663,6 +1823,66 @@ function removePulseByLocationKey(locationKey) {
     pulseHistory = pulseHistory.filter(pulse => getLocationKey(pulse.lat, pulse.lon) !== locationKey);
 }
 
+function createLaunchPulse(lat, lon, color, durationMs = 650) {
+    if (!map || !window.L || typeof lat !== 'number' || typeof lon !== 'number') return;
+    const marker = L.circleMarker([lat, lon], {
+        radius: 4,
+        color: color,
+        fillColor: color,
+        fillOpacity: 0.6,
+        opacity: 0.9,
+        weight: 1,
+        interactive: false
+    }).addTo(map);
+
+    const start = performance.now();
+    const pulse = (now) => {
+        const elapsed = now - start;
+        const phase = Math.min(elapsed / durationMs, 1);
+        const radius = 4 + phase * 8;
+        const opacity = 0.7 * (1 - phase);
+        if (marker) {
+            marker.setRadius(radius);
+            marker.setStyle({ opacity, fillOpacity: opacity });
+        }
+        if (elapsed < durationMs) {
+            requestAnimationFrame(pulse);
+        } else if (marker && map.hasLayer(marker)) {
+            map.removeLayer(marker);
+        }
+    };
+    requestAnimationFrame(pulse);
+}
+
+function addLocalPulseAtLaunch(lat, lon, source = 'client') {
+    if (typeof lat !== 'number' || typeof lon !== 'number') return;
+    const locationKey = getLocationKey(lat, lon);
+    if (!locationKey) return;
+
+    const country = getCountryFromCoordinates(lat, lon);
+    const pulseEntry = {
+        country,
+        timestamp: new Date(),
+        timestampISO: new Date().toISOString(),
+        lat,
+        lon,
+        locationKey,
+        source,
+        localOnly: true
+    };
+
+    const existingIndex = pulseHistory.findIndex(p => getLocationKey(p.lat, p.lon) === locationKey);
+    if (existingIndex >= 0) {
+        pulseHistory[existingIndex] = pulseEntry;
+    } else {
+        pulseHistory.push(pulseEntry);
+    }
+
+    if (map && pulseHistory && pulseHistory.length > 0) {
+        updateMarkers({}, pulseHistory, currentPeriod);
+    }
+}
+
 function applyDestroyedTargets(list = []) {
     destroyedTargetIds.clear();
     list.forEach(key => {
@@ -1710,7 +1930,7 @@ function setupPulseButton() {
             console.log(`⚠️ No target selected, will attack random location in range`);
         }
 
-        const coords = userCoordinates || (map ? { lat: map.getCenter().lat, lon: map.getCenter().lng } : { lat: null, lon: null });
+        const coords = userCoordinates || { lat: null, lon: null };
 
         // ===== BATTLE MODE: ATTACK =====
         if (battleModeEnabled && coords.lat !== null && coords.lon !== null) {
@@ -1764,7 +1984,8 @@ function setupPulseButton() {
 
             // Send ATTACK event
             console.log(`⚔️ Human player attacking: (${coords.lat.toFixed(2)}, ${coords.lon.toFixed(2)}) → (${targetCoords.lat.toFixed(2)}, ${targetCoords.lon.toFixed(2)})`);
-            console.log(`   Range: ${currentBattleRange}km, Duration: ${ATTACK_DURATIONS[currentBattleRange]}s`);
+            const attackDuration = calculateAttackDurationSec(currentAttackType, coords.lat, coords.lon, targetCoords.lat, targetCoords.lon);
+            console.log(`   Range: ${currentBattleRange}km, Duration: ${attackDuration}s`);
             console.log(`   Attack type: ${currentAttackType} (${ATTACK_TYPES[currentAttackType].name}), Cost: ${ATTACK_TYPES[currentAttackType].cost} pts`);
             
             // Check if player has enough points for this attack type
@@ -1775,12 +1996,22 @@ function setupPulseButton() {
                 return;
             }
             
+            // Check if target is in same country
+            const attackerCountry = getCountryFromCoordinates(coords.lat, coords.lon);
+            const targetCountry = getCountryFromCoordinates(targetCoords.lat, targetCoords.lon);
+            
+            if (attackerCountry === targetCountry) {
+                showTemporaryStatus(`❌ Can't attack same country (${attackerCountry})`, '#ef4444', 3000);
+                return;
+            }
+            
             // Deduct cost
             personalScore -= attackCost;
             battleStats.pointsSpent += attackCost;
             battleStats.totalAttacks++;
             localStorage.setItem('gpPersonalScore', personalScore.toString());
             updateScoreDisplay();
+            updateSessionUI();
             
             const attackEvent = {
                 fromLat: coords.lat,
@@ -1789,7 +2020,7 @@ function setupPulseButton() {
                 toLon: targetCoords.lon,
                 isAutoAgent: false,
                 attackType: currentAttackType,
-                duration: ATTACK_DURATIONS[currentBattleRange] || 8,
+                duration: attackDuration,
                 timestamp: new Date().toISOString(),
                 startTime: Date.now()
             };
@@ -1812,11 +2043,11 @@ function setupPulseButton() {
                 console.log('   ✅ Attack emitted');
                 
                 // Show success feedback with points spent
-                showCelebration(`⚔️ ${ATTACK_TYPES[currentAttackType].name} launched! (-${attackCost} pts)`, 'player');
+                showCelebration(`Attack launched! (-${attackCost} pts)`, 'player', { attackType: currentAttackType });
                 
-                // Show ad overlay during attack (30s)
-                showAdOverlay();
-                startAdTimer(30);
+                // Show ad overlay during attack
+                showAdOverlay(attackDuration);
+                startAdTimer(attackDuration);
             } else {
                 console.log('   ❌ Socket not connected!', { socketExists: !!socket, connected: socket?.connected });
                 showTemporaryStatus('⚠️ Not connected', '#f59e0b');
@@ -1827,8 +2058,13 @@ function setupPulseButton() {
             }
             
             // Start cooldown ONLY once
-            startAttackCooldown();
+            startAttackCooldown(attackDuration);
             return; // Exit - attack mode is complete
+        }
+
+        if (battleModeEnabled && (coords.lat === null || coords.lon === null)) {
+            showTemporaryStatus('📍 Location unavailable. Enable GPS.', '#ef4444', 2500);
+            return;
         }
 
         // ===== PULSE MODE: SEND PULSE =====
@@ -2031,38 +2267,8 @@ function handleGeolocationSuccess(position) {
     // Update country display with source
     const countryEl = document.getElementById('userCountry');
     
-    // Get city name from reverse geocoding (Nominatim - free OSM service)
-    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userCoordinates.lat}&lon=${userCoordinates.lon}&zoom=10&addressdetails=1`)
-        .then(response => response.json())
-        .then(data => {
-            const cityEl = document.getElementById('userCity');
-            const address = data?.address || {};
-
-            if (cityEl) {
-                const city = address.city || address.town || address.village || address.suburb || '';
-                if (city) {
-                    cityEl.textContent = `🏙️ ${city}`;
-                    cityEl.style.display = 'block';
-                }
-            }
-            
-            // Update country using country_code when available
-            const countryName = address.country || '';
-            const countryCode = address.country_code ? address.country_code.toUpperCase() : getCountryCodeFromName(countryName);
-
-            if (countryCode || countryName) {
-                updateCountryDisplay(countryCode, countryName, locationSource);
-            } else {
-                estimateCountryFromCoordinates(userCoordinates.lat, userCoordinates.lon);
-            }
-        })
-        .catch(err => {
-            console.log('Could not get city name:', err);
-            estimateCountryFromCoordinates(userCoordinates.lat, userCoordinates.lon);
-            fetchIpLocationFallback();
-        });
-    
-    // Immediate fallback in case reverse geocoding is slow or blocked
+    // Skip Nominatim reverse geocoding (causes timeout/CORS issues)
+    // Use local country estimation instead
     estimateCountryFromCoordinates(userCoordinates.lat, userCoordinates.lon);
     updateGeoButtonVisibility('granted');
 }
@@ -2087,8 +2293,8 @@ function updateCountryDisplay(countryCode, countryName, sourceLabel = 'IP') {
     if (!countryCode && !countryName) return;
 
     const displayName = countryCode && countryCoordinates[countryCode]
-        ? countryCoordinates[countryCode].name
-        : (countryName || 'Unknown');
+        ? normalizeCountryName(countryCoordinates[countryCode].name)
+        : normalizeCountryName(countryName || 'Unknown');
 
     if (userCountryEl) {
         userCountryEl.textContent = `${displayName} (${sourceLabel})`;
@@ -2100,13 +2306,22 @@ function updateCountryDisplay(countryCode, countryName, sourceLabel = 'IP') {
 
 function getCountryCodeFromName(countryName) {
     if (!countryName) return null;
-    const normalized = countryName.trim().toLowerCase();
+    const normalized = normalizeCountryName(countryName).trim().toLowerCase();
     for (const [code, coords] of Object.entries(countryCoordinates)) {
-        if (coords?.name && coords.name.trim().toLowerCase() === normalized) {
+        if (coords?.name && normalizeCountryName(coords.name).trim().toLowerCase() === normalized) {
             return code;
         }
     }
     return null;
+}
+
+function normalizeCountryName(name) {
+    if (!name || typeof name !== 'string') return name;
+    return name
+        .replace(/^\s*the\s+/i, '')
+        .replace(/\s*\(the\)\s*$/i, '')
+        .replace(/\s*,\s*the\s*$/i, '')
+        .trim();
 }
 
 function fetchIpLocationFallback() {
@@ -2144,7 +2359,13 @@ function estimateCountryFromCoordinates(lat, lon) {
     }
     
     userCountry = minDistance < 25 ? closest : 'Unknown';
-    userCountryEl.textContent = (countryCoordinates[userCountry] && countryCoordinates[userCountry].name) || 'Unknown';
+    
+    // Only update element if it exists
+    if (userCountryEl) {
+        const rawName = (countryCoordinates[userCountry] && countryCoordinates[userCountry].name) || 'Unknown';
+        userCountryEl.textContent = normalizeCountryName(rawName);
+    }
+    
     console.log('🗺️ Detected country:', userCountry, (countryCoordinates[userCountry] && countryCoordinates[userCountry].name));
 }
 
@@ -2277,6 +2498,12 @@ function updateSessionUI() {
     const statSessionsEl = document.getElementById('statSessions');
     const statPulsesEl = document.getElementById('statPulses');
     const statKillsEl = document.getElementById('statKills');
+    
+    // New metrics
+    const avgDamageEl = document.getElementById('avgDamage');
+    const accuracyEl = document.getElementById('battAccuracy');
+    const attacksSentEl = document.getElementById('attacksSent');
+    const pointsSpentEl = document.getElementById('pointsSpent');
 
     if (sessionTimeEl && sessionStartTime) {
         const diffMs = Date.now() - sessionStartTime;
@@ -2291,8 +2518,68 @@ function updateSessionUI() {
     if (statSessionsEl) statSessionsEl.textContent = totalSessions;
     if (statPulsesEl) statPulsesEl.textContent = totalPulses;
     if (statKillsEl) statKillsEl.textContent = totalKills;
+    
+    // Calculate and display new metrics
+    if (avgDamageEl) {
+        const avgDamage = battleStats.successfulHits > 0 
+            ? Math.round(battleStats.damageDealt / battleStats.successfulHits * 10) / 10
+            : 0;
+        avgDamageEl.textContent = avgDamage.toFixed(1);
+    }
+    
+    if (accuracyEl) {
+        const accuracy = battleStats.totalAttacks > 0
+            ? Math.round((battleStats.successfulHits / battleStats.totalAttacks) * 100)
+            : 0;
+        accuracyEl.textContent = accuracy + '%';
+    }
+    
+    if (attacksSentEl) {
+        attacksSentEl.textContent = battleStats.totalAttacks || 0;
+    }
+
+    if (pointsSpentEl) {
+        pointsSpentEl.textContent = (battleStats.pointsSpent || 0).toLocaleString();
+    }
 
     updateAchievements();
+    updateStatsTab();
+}
+
+function updateStatsTab() {
+    // Update accuracy in stats tab
+    const statAccuracyEl = document.getElementById('statAccuracy');
+    if (statAccuracyEl) {
+        const accuracy = battleStats.totalAttacks > 0
+            ? Math.round((battleStats.successfulHits / battleStats.totalAttacks) * 100)
+            : 0;
+        statAccuracyEl.textContent = accuracy + '%';
+    }
+    
+    // Update average damage in stats tab
+    const statAvgDamageEl = document.getElementById('statAvgDamage');
+    if (statAvgDamageEl) {
+        const avgDamage = battleStats.successfulHits > 0 
+            ? Math.round(battleStats.damageDealt / battleStats.successfulHits * 10) / 10
+            : 0;
+        statAvgDamageEl.textContent = avgDamage.toFixed(1);
+    }
+    
+    // Update K/D ratio in stats tab
+    const statKDEl = document.getElementById('statKD');
+    if (statKDEl) {
+        const kdRatio = (battleStats.damageTaken > 0) 
+            ? (battleStats.successfulHits / (battleStats.damageTaken / 100)).toFixed(2)
+            : (battleStats.successfulHits > 0 ? battleStats.successfulHits : 0).toFixed(1);
+        statKDEl.textContent = kdRatio;
+    }
+    
+    // Update points earned (total from destroying targets)
+    const statPointsEarnedEl = document.getElementById('statPointsEarned');
+    if (statPointsEarnedEl) {
+        const pointsEarned = (battleStats.pointsEarned || 0);
+        statPointsEarnedEl.textContent = pointsEarned.toLocaleString();
+    }
 }
 
 function updateDailyChallenge() {
@@ -2310,8 +2597,8 @@ function updateAchievements() {
     if (!badges.length) return;
     
     const achievementNames = {
-        'pulses-1': { name: 'First Pulse', icon: '💓' },
-        'pulses-10': { name: 'Pulse Master', icon: '💯' },
+        'pulses-1': { name: 'First Attack', icon: '💓' },
+        'pulses-10': { name: 'Attack Master', icon: '💯' },
         'kills-1': { name: 'First Blood', icon: '⚔️' },
         'pulses-5': { name: 'World Traveler', icon: '🌍' },
         'global-1': { name: 'Global Strike', icon: '🚀' },
@@ -2421,49 +2708,21 @@ async function reverseGeocode(lat, lon) {
         return geocodeCache.get(cacheKey);
     }
     
-    try {
-        const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`,
-            { headers: { 'User-Agent': 'GlobalPulseMap/1.0' } }
-        );
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
-        const address = data.address || {};
-        
-        const result = {
-            city: address.city || address.town || address.village || address.municipality || '',
-            state: address.state || address.province || '',
-            country: address.country || '',
-            countryCode: address.country_code ? address.country_code.toUpperCase() : '',
-            displayName: data.display_name || '',
-            formatted: []
-        };
-        
-        // Build formatted address
-        if (result.city) result.formatted.push(result.city);
-        if (result.state && result.state !== result.city) result.formatted.push(result.state);
-        if (result.country) result.formatted.push(result.country);
-        
-        result.formattedAddress = result.formatted.join(', ') || `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
-        
-        geocodeCache.set(cacheKey, result);
-        return result;
-    } catch (error) {
-        console.warn('Geocoding failed:', error);
-        return {
-            city: '',
-            state: '',
-            country: '',
-            countryCode: '',
-            displayName: '',
-            formatted: [],
-            formattedAddress: `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`
-        };
-    }
+    // Return quick fallback without trying to fetch from Nominatim (too slow/blocked)
+    const fallback = {
+        city: '',
+        state: '',
+        country: '',
+        countryCode: '',
+        displayName: '',
+        formatted: [],
+        formattedAddress: `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`
+    };
+    
+    // Don't bother with Nominatim - it times out due to CORS and rate limiting
+    // Server-side country detection is sufficient
+    geocodeCache.set(cacheKey, fallback);
+    return fallback;
 }
 
 // ============ Marker Management ============
@@ -2557,11 +2816,10 @@ function updateMarkers(countries, pulseHistory = null, period = 'all') {
             return;
         }
         
-        // Get country name
-        const countryName = (countryCoordinates[pulse.country] && countryCoordinates[pulse.country].name) || pulse.country;
-        
-        // All saved pulses are RED
-        const color = '#EF4444';  // Red for all saved pulses
+        // Color pulses by source: auto/seed = blue, human = red
+        const source = (pulse.source || '').toLowerCase();
+        const isAutoPulse = source.startsWith('auto') || source === 'seed';
+        const color = isAutoPulse ? '#3B82F6' : '#EF4444';
         
         // Create custom HTML marker
         const markerHtml = '<div style="' +
@@ -2570,7 +2828,9 @@ function updateMarkers(countries, pulseHistory = null, period = 'all') {
             'border-radius: 50%; ' +
             'width: 8px; ' +
             'height: 8px; ' +
-            'box-shadow: 0 0 6px rgba(239,68,68,0.6); ' +
+            (isAutoPulse
+                ? 'box-shadow: 0 0 6px rgba(59,130,246,0.6); '
+                : 'box-shadow: 0 0 6px rgba(239,68,68,0.6); ') +
             'display: flex; ' +
             'align-items: center; ' +
             'justify-content: center; ' +
@@ -2580,29 +2840,46 @@ function updateMarkers(countries, pulseHistory = null, period = 'all') {
             icon: L.divIcon({
                 html: markerHtml,
                 iconSize: [8, 8],
-                className: 'pulse-marker'
+                iconAnchor: [4, 4],  // Center the icon
+                className: ''  // No class to avoid CSS conflicts
             })
         }).addTo(map);
         
         // Calculate target age and points for tooltip
-        const flag = getCountryFlag(pulse.country);
+        // Use accurate country name from geoData if available
+        const countryName = normalizeCountryName((pulse.geoData && pulse.geoData.countryName) 
+            ? pulse.geoData.countryName 
+            : pulse.country || 'Unknown');
+        const flag = getCountryFlag(pulse.geoData?.countryCode || pulse.country);
         const pulseTimestamp = getTimestampMs(pulse);
         const sourceIcon = pulse.source === 'auto' ? '🤖' : '👤';  // Bot or Human
         
-        // Fetch real address (async)
+        // Use enhanced geo data from server if available
         let addressInfo = null;
-        reverseGeocode(pulse.lat, pulse.lon).then(info => {
-            addressInfo = info;
-            if (markers[markerId]) {
-                marker.setTooltipContent(getTooltipContent());
-            }
-        });
+        if (pulse.geoData) {
+            // Server provided accurate geo data with full details
+            addressInfo = {
+                formattedAddress: pulse.geoData.formattedAddress || `${pulse.lat.toFixed(2)}°, ${pulse.lon.toFixed(2)}°`,
+                displayName: pulse.geoData.displayName || '',
+                city: pulse.geoData.city,
+                state: pulse.geoData.state,
+                county: pulse.geoData.county,
+                road: pulse.geoData.road,
+                houseNumber: pulse.geoData.houseNumber,
+                postcode: pulse.geoData.postcode,
+                quarter: pulse.geoData.quarter,
+                country: normalizeCountryName(pulse.geoData.countryName),
+                countryCode: pulse.geoData.countryCode,
+                precision: pulse.geoData.precision
+            };
+        }
         
         // Function to generate tooltip content
         const getTooltipContent = () => {
             const targetAge = Date.now() - pulseTimestamp;
-            const points = calculateTargetPoints(targetAge);
             const ageInMinutes = Math.floor(targetAge / 60000);
+            const ageBonus = Math.min(ageInMinutes, 60);
+            const points = 10 + ageBonus; // Match server formula exactly
             const ageDisplay = ageInMinutes < 60 ? `${ageInMinutes} min` : `${Math.floor(ageInMinutes/60)}h ${ageInMinutes%60}m`;
             
             // Show defense info if this is user's own location
@@ -2659,7 +2936,6 @@ function updateMarkers(countries, pulseHistory = null, period = 'all') {
                 timestamp: getTimestampMs(pulse)
             };
             setBattleTarget(targetData);
-            showTargetInfo(targetData);
         });
         markers[markerId] = marker;
         console.log('✅ Created marker:', markerId);
@@ -2678,17 +2954,28 @@ function getHeatColor(intensity) {
 }
 
 // ============ Celebration & Feedback Functions ============
-function showCelebration(message, type = 'kill') {
+function showCelebration(message, type = 'kill', extraInfo = null) {
     const battleFeed = document.getElementById('battleFeed');
     if (battleFeed) {
         const feedItem = document.createElement('div');
         feedItem.className = `feed-item ${type}`;
-        feedItem.textContent = message;
+        
+        // Build enhanced message with type and damage info
+        let enhancedMessage = message;
+        if (extraInfo) {
+            const attackTypeInfo = extraInfo.attackType ? ATTACK_TYPES[extraInfo.attackType] : null;
+            const typeIcon = attackTypeInfo ? attackTypeInfo.name.split(' ')[0] : '⚡';
+            const damage = attackTypeInfo ? attackTypeInfo.damage : '';
+            const damageInfo = damage ? ` • ${damage} DMG` : '';
+            enhancedMessage = `${typeIcon} ${message}${damageInfo}`;
+        }
+        
+        feedItem.textContent = enhancedMessage;
         
         battleFeed.insertBefore(feedItem, battleFeed.firstChild);
         
-        // Keep only last 50 items (for performance)
-        const MAX_FEED_ITEMS = 50;
+        // Keep only last 10 items
+        const MAX_FEED_ITEMS = 10;
         while (battleFeed.children.length > MAX_FEED_ITEMS) {
             battleFeed.removeChild(battleFeed.lastChild);
         }
@@ -2706,8 +2993,8 @@ function showCelebration(message, type = 'kill') {
     updateLiveStats();
 }
 
-function celebrateKill(targetName) {
-    showCelebration(`💥 ${targetName} Destroyed!`, 'kill');
+function celebrateKill(targetName, attackType = null) {
+    showCelebration(`${targetName} Destroyed!`, 'kill', attackType ? { attackType } : null);
     // Add shake to attack button
     const pulseBtn = document.getElementById('pulseBtn');
     if (pulseBtn) {
@@ -2735,8 +3022,8 @@ function setupShareButton() {
     
     shareBtn.addEventListener('click', async () => {
         const shareData = {
-            title: 'GlobalPulseMap - My Stats',
-            text: `🌍 I destroyed ${totalKills} targets with ${totalPulses} pulses! Personal best: ${personalBest} kills.\n🎯 Can you beat my score?`,
+            title: 'GlobalAttackMap - My Stats',
+            text: `🌍 I destroyed ${totalKills} targets with ${totalPulses} attacks! Personal best: ${personalBest} kills.\n🎯 Can you beat my score?`,
             url: window.location.href
         };
         
@@ -2788,7 +3075,7 @@ function setupSocketListeners() {
         console.log('✅ Connected to server');
         if (statusEl) {
             statusEl.style.backgroundColor = '#4caf50';
-            statusText.textContent = '✓ Connected - Ready to pulse!';
+            statusText.textContent = '✓ Connected - Ready to attack!';
         }
         updateConnectionWidgets('connected');
         
@@ -2969,7 +3256,7 @@ function setupSocketListeners() {
         triggerEcgBeat();
     });
 
-    const renderAttackEvent = (data, eventName = 'attackEvent', elapsedMs = 0) => {
+    const renderAttackEvent = (data, eventName = 'attackEvent', elapsedMs = 0, retryCount = 0) => {
         console.log(`\n⚔️ ===== ${eventName.toUpperCase()} RECEIVED =====`);
         console.log('   Data:', data);
         if (elapsedMs > 0) console.log(`   Elapsed: ${(elapsedMs/1000).toFixed(1)}s`);
@@ -2980,7 +3267,16 @@ function setupSocketListeners() {
         }
 
         if (!map || !window.L) {
-            console.warn('❌ Map not ready for attack');
+            if (retryCount >= 10) {
+                console.error('❌ Map not ready after 10 retries - giving up');
+                return;
+            }
+            console.warn(`⚠️ Map not ready for attack (retry ${retryCount + 1}/10 in 100ms)...`);
+            // Retry after a short delay
+            setTimeout(() => {
+                console.log('🔄 Retrying renderAttackEvent after map ready check');
+                renderAttackEvent(data, eventName, elapsedMs + 100, retryCount + 1);
+            }, 100);
             return;
         }
 
@@ -2988,22 +3284,34 @@ function setupSocketListeners() {
         const end = { lat: data.toLat, lon: data.toLon };
         const duration = data.duration || 8;
         const isAuto = data.isAutoAgent || false;
+        const attackType = ATTACK_TYPES[data.attackType] ? data.attackType : 'pulse';
+        const attackConfig = ATTACK_TYPES[attackType] || ATTACK_TYPES.pulse;
 
         console.log(`   Start: (${start.lat.toFixed(2)}, ${start.lon.toFixed(2)})`);
         console.log(`   End: (${end.lat.toFixed(2)}, ${end.lon.toFixed(2)})`);
         console.log(`   Duration: ${duration}s`);
         console.log(`   Type: ${isAuto ? '🤖 AUTO' : '👤 HUMAN'}`);
+        console.log(`   Attack Type: ${attackType}, Scale: ${attackConfig.rocketScale}`);
         
-        // Show attack info popup
-        showAttackInfoPopup(data);
+        // Add to battle feed instead of popup
+        const fromCountry = getCountryFromCoordinates(data.fromLat, data.fromLon);
+        const toCountry = getCountryFromCoordinates(data.toLat, data.toLon);
+        const distance = calculateDistance(data.fromLat, data.fromLon, data.toLat, data.toLon);
+        const typeIcon = data.isAutoAgent ? '🤖' : '👤';
+        const message = `⚔️ ${typeIcon} ${fromCountry} ➜ ${toCountry} (${distance.toFixed(0)}km)`;
+        showCelebration(message, 'attack');
 
         try {
+            // Human attacks are always red; auto attacks are blue
+            const trajectoryColor = isAuto ? '#3B82F6' : '#EF4444';
+            
             // Draw trajectory (match human style)
             const points = createArcPoints(start, end, 60);
             console.log(`   Arc points: ${points.length}`);
 
-            const polyline = L.polyline(points, {
-                color: '#EF4444',
+            // Create polyline but START EMPTY to avoid flickering the full trajectory
+            const polyline = L.polyline([], {
+                color: trajectoryColor,
                 weight: 1.5,
                 opacity: 0.8,
                 dashArray: '6 10',
@@ -3012,24 +3320,36 @@ function setupSocketListeners() {
                 className: 'trajectory-line'
             }).addTo(map);
             console.log(`   Polyline created and added`);
+            
+            // Show pulsing launch marker for both humans and bots
+            const launchColor = isAuto ? '#3B82F6' : '#EF4444';
+            const launchSource = isAuto ? 'auto' : 'client';
+            addLocalPulseAtLaunch(start.lat, start.lon, launchSource);
+            createLaunchPulse(start.lat, start.lon, launchColor);
 
-            const rocket = createRocketMarker(start.lat, start.lon, end.lat, end.lon).addTo(map);
+            const rocket = createRocketMarker(start.lat, start.lon, end.lat, end.lon, trajectoryColor, attackConfig.rocketScale, attackType);
+            if (!rocket) {
+                console.error('Failed to create rocket marker');
+                return;
+            }
+            rocket.addTo(map);
             console.log(`   Rocket created and added`);
 
             const startTime = performance.now() - elapsedMs; // Adjust for elapsed time
             const animationDuration = duration * 1000;
 
             const animate = (now) => {
+                if (!rocket || !map || !map.hasLayer(rocket)) return; // Safeguard
                 const t = Math.min((now - startTime) / animationDuration, 1);
                 const idx = Math.floor(t * (points.length - 1));
                 const point = points[idx];
                 const prevIdx = Math.max(0, idx - 1);
                 const prevPoint = points[prevIdx];
 
-                rocket.setLatLng(point);
+                if (point && prevPoint) rocket.setLatLng(point);
                 // Only update heading when there's meaningful movement
                 if (idx !== prevIdx) {
-                    updateRocketHeading(rocket, prevPoint, point);
+                    updateRocketHeading(rocket, prevPoint, point, trajectoryColor, attackConfig.rocketScale, attackType);
                 }
                 polyline.setLatLngs(points.slice(0, idx + 1));
                 polyline.setStyle({ dashOffset: -t * 60 });
@@ -3075,109 +3395,6 @@ function setupSocketListeners() {
         }
     };
 
-    // ============ ATTACK INFO POPUP ============
-    async function showAttackInfoPopup(attackData) {
-        const fromCountry = getCountryFromCoordinates(attackData.fromLat, attackData.fromLon);
-        const toCountry = getCountryFromCoordinates(attackData.toLat, attackData.toLon);
-        const fromFlag = getCountryFlag(fromCountry);
-        const toFlag = getCountryFlag(toCountry);
-        const typeIcon = attackData.isAutoAgent ? '🤖' : '👤';
-        const distance = calculateDistance(attackData.fromLat, attackData.fromLon, attackData.toLat, attackData.toLon);
-        
-        // Fetch addresses
-        const fromAddress = await reverseGeocode(attackData.fromLat, attackData.fromLon);
-        const toAddress = await reverseGeocode(attackData.toLat, attackData.toLon);
-        
-        const popup = document.createElement('div');
-        popup.className = 'attack-info-popup';
-        popup.style.cssText = `
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            background: linear-gradient(135deg, rgba(30, 30, 46, 0.98), rgba(49, 50, 68, 0.98));
-            border: 1px solid rgba(239, 68, 68, 0.5);
-            border-radius: 12px;
-            padding: 16px 20px;
-            min-width: 320px;
-            max-width: 400px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(239, 68, 68, 0.3);
-            z-index: 10000;
-            animation: slideInRight 0.3s ease-out;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            color: #e4e4e7;
-        `;
-        
-        popup.innerHTML = `
-            <style>
-                @keyframes slideInRight {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-                @keyframes slideOutRight {
-                    from { transform: translateX(0); opacity: 1; }
-                    to { transform: translateX(100%); opacity: 0; }
-                }
-            </style>
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
-                <div style="font-size: 1.1rem; font-weight: 600; color: #ef4444;">
-                    ⚔️ Attack in Progress
-                </div>
-                <button onclick="this.closest('.attack-info-popup').remove()" style="
-                    background: none;
-                    border: none;
-                    color: #a1a1aa;
-                    font-size: 1.3rem;
-                    cursor: pointer;
-                    padding: 0;
-                    width: 24px;
-                    height: 24px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 4px;
-                    transition: all 0.2s;
-                ">&times;</button>
-            </div>
-            
-            <div style="font-size: 0.85rem; line-height: 1.6;">
-                <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                    <div style="color: #a1a1aa; font-size: 0.75rem; margin-bottom: 4px;">ATTACKER ${typeIcon}</div>
-                    <div style="font-weight: 500; margin-bottom: 2px;">${fromFlag} ${fromCountry}</div>
-                    <div style="color: #a1a1aa; font-size: 0.8rem;">${fromAddress.formattedAddress}</div>
-                    <div style="color: #71717a; font-size: 0.75rem; margin-top: 2px;">${attackData.fromLat.toFixed(4)}°, ${attackData.fromLon.toFixed(4)}°</div>
-                </div>
-                
-                <div style="text-align: center; margin: 8px 0; color: #ef4444; font-size: 1.2rem;">⚡ ${distance.toFixed(0)} km ➜</div>
-                
-                <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                    <div style="color: #a1a1aa; font-size: 0.75rem; margin-bottom: 4px;">TARGET 🎯</div>
-                    <div style="font-weight: 500; margin-bottom: 2px;">${toFlag} ${toCountry}</div>
-                    <div style="color: #a1a1aa; font-size: 0.8rem;">${toAddress.formattedAddress}</div>
-                    <div style="color: #71717a; font-size: 0.75rem; margin-top: 2px;">${attackData.toLat.toFixed(4)}°, ${attackData.toLon.toFixed(4)}°</div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; font-size: 0.8rem;">
-                    <div style="background: rgba(239, 68, 68, 0.1); padding: 8px; border-radius: 6px; text-align: center;">
-                        <div style="color: #a1a1aa; font-size: 0.7rem;">DURATION</div>
-                        <div style="font-weight: 600; color: #ef4444;">${attackData.duration || 8}s</div>
-                    </div>
-                    <div style="background: rgba(74, 222, 128, 0.1); padding: 8px; border-radius: 6px; text-align: center;">
-                        <div style="color: #a1a1aa; font-size: 0.7rem;">TYPE</div>
-                        <div style="font-weight: 600; color: #4ade80;">${attackData.isAutoAgent ? 'AUTO' : 'HUMAN'}</div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(popup);
-        
-        // Auto-remove after attack duration + 2s
-        setTimeout(() => {
-            popup.style.animation = 'slideOutRight 0.3s ease-in';
-            setTimeout(() => popup.remove(), 300);
-        }, (attackData.duration || 8) * 1000 + 2000);
-    }
-    
     // ============ INCOMING ATTACK DEFENSE ============
     function handleIncomingAttack(attackData) {
         console.log('🛡️ Handling incoming attack...');
@@ -3294,7 +3511,6 @@ function setupSocketListeners() {
 
         if (selectedTargetSnapshot && selectedTargetSnapshot.id === markerId) {
             clearBattleTarget();
-            hideTargetInfo();
         }
         refreshBattleTargets();
         updateGlobalStats();
@@ -3307,6 +3523,15 @@ function setupSocketListeners() {
             if (sessionKills > personalBest) {
                 personalBest = sessionKills;
             }
+        }
+
+        // Update battle stats for confirmed player hits (exclude auto-agent destroys)
+        if (!isAutoAgentDestroy && playerAttackData) {
+            const attackType = playerAttackData.attackType || currentAttackType;
+            const attackDamage = ATTACK_TYPES[attackType]?.damage || 0;
+            battleStats.successfulHits += 1;
+            battleStats.damageDealt += attackDamage;
+            battleStats.targetsDestroyed += 1;
         }
         
         // 🎉 Calculate and add score based on target age - ONLY for human player destroys
@@ -3330,14 +3555,21 @@ function setupSocketListeners() {
             targetCountry = data.targetCountry;
         }
 
+        const targetAge = targetTimestamp ? (Date.now() - targetTimestamp) : null;
+
         // Add score only for player's target (except auto-agent destroys)
         if (!isAutoAgentDestroy && isPlayerTarget) {
-            const effectiveTimestamp = targetTimestamp || (data?.timestamp ? new Date(data.timestamp).getTime() : Date.now());
-            const targetAge = Math.max(Date.now() - effectiveTimestamp, 0);
-            
-            // Get attack cost from tracked attack data
-            const attackCost = playerAttackData?.cost || 0;
-            const basePoints = calculateTargetPoints(targetAge, attackCost);
+            // Prefer server-calculated points, fallback to local formula
+            const basePoints = (data?.pointsEarned !== undefined)
+                ? data.pointsEarned
+                : (targetAge !== null
+                    ? (10 + Math.min(Math.floor(targetAge / 60000), 60))
+                    : undefined);
+            if (basePoints === undefined) {
+                console.warn('⚠️ No points available (server missing, local age unknown), skipping score');
+                return;
+            }
+            console.log('🎯 Using points:', basePoints, data?.pointsEarned !== undefined ? '(server)' : '(local)');
             
             // Apply defense reduction based on target's defense capabilities
             let points = basePoints;
@@ -3379,7 +3611,8 @@ function setupSocketListeners() {
             if (defenseReduction > 0) {
                 destroyMessage += ` (defense -${defenseReduction})`;
             }
-            celebrateKill(destroyMessage);
+            const attackType = playerAttackData?.attackType || currentAttackType;
+            celebrateKill(destroyMessage, attackType);
             celebrateStreak(sessionStreak);
             
             // Update battle stats with defense interaction
@@ -3399,8 +3632,27 @@ function setupSocketListeners() {
             };
             activityHistory.push(attackActivity);
             if (recentActivityEl) {
-                const item = createActivityItem(attackActivity);
-                recentActivityEl.insertBefore(item, recentActivityEl.firstChild);
+                const item = document.createElement('div');
+                item.className = 'activity-item';
+                item.dataset.timestamp = Date.now();
+                const flag = getCountryFlag(targetCountry) || '🌍';
+                item.innerHTML = `
+                    <div class="activity-left">
+                        <span class="activity-country">👤 ${targetCountry}</span>
+                        <div class="activity-details">+${points} pts</div>
+                        <div class="activity-time">just now</div>
+                    </div>
+                    <div class="activity-right">
+                        <div class="activity-flag">${flag}</div>
+                    </div>
+                `;
+                const loading = recentActivityEl.querySelector('.loading');
+                if (loading) loading.remove();
+                if (recentActivityEl.firstChild) {
+                    recentActivityEl.insertBefore(item, recentActivityEl.firstChild);
+                } else {
+                    recentActivityEl.appendChild(item);
+                }
                 limitActivityItems();
             }
             saveRecentActivities();
@@ -3539,7 +3791,7 @@ function updateTopCountries(countries) {
         .sort((a, b) => b[1] - a[1]);
     
     if (sorted.length === 0) {
-        topCountriesEl.innerHTML = '<p class="loading">Waiting for pulses...</p>';
+        topCountriesEl.innerHTML = '<p class="loading">Waiting for attacks...</p>';
         return;
     }
     
@@ -3594,7 +3846,7 @@ function refreshBattleTargets() {
     battleTargetsEl.innerHTML = available.map((pulse) => {
         const locationKey = getLocationKey(pulse.lat, pulse.lon);
         const markerId = `PULSE_${locationKey}`;
-        const countryName = (countryCoordinates[pulse.country] && countryCoordinates[pulse.country].name) || pulse.country;
+        const countryName = normalizeCountryName((countryCoordinates[pulse.country] && countryCoordinates[pulse.country].name) || pulse.country);
         const activeClass = selectedTarget && selectedTarget.id === markerId ? 'active' : '';
         return `
             <button class="battle-target-item ${activeClass}" data-target-id="${markerId}">
@@ -3628,9 +3880,123 @@ function setBattleTarget(target) {
     
     // Update compact display in new Battle Command Center
     const compactDisplay = document.getElementById('battleTargetNameCompact');
+    const countryInfoEl = document.getElementById('targetInfoCountry');
+    const ageEl = document.getElementById('targetInfoAge');
+    const pointsEl = document.getElementById('targetInfoPoints');
+    const distanceEl = document.getElementById('targetInfoDistance');
+    const typeEl = document.getElementById('targetInfoType');
+    const defenseEl = document.getElementById('targetInfoDefense');
+    
     if (compactDisplay) {
-        const shortName = (target.name || 'Target').substring(0, 12);
-        compactDisplay.textContent = shortName;
+        const flag = getCountryFlag(target.country);
+        const fullName = target.name || 'Target';
+        const shortName = fullName.length > 20 
+            ? fullName.substring(0, 18) + '...' 
+            : fullName;
+        compactDisplay.innerHTML = `${flag} <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${shortName}</span>`;
+    }
+    
+    // Update country info with coordinates and location
+    if (countryInfoEl) {
+        const coords = `${target.lat.toFixed(4)}°, ${target.lon.toFixed(4)}°`;
+        
+        // Get more detailed location info from pulse history
+        const locationKey = getLocationKey(target.lat, target.lon);
+        const pulse = pulseHistory.find(p => getLocationKey(p.lat, p.lon) === locationKey);
+        let locationText = coords;
+        
+        if (pulse && pulse.geoData) {
+            const parts = [];
+            if (pulse.geoData.city) parts.push(pulse.geoData.city);
+            if (pulse.geoData.state && pulse.geoData.state !== pulse.geoData.city) parts.push(pulse.geoData.state);
+            if (pulse.geoData.countryName) parts.push(normalizeCountryName(pulse.geoData.countryName));
+            
+            if (parts.length > 0) {
+                locationText = `📍 ${parts.join(', ')}`;
+            } else {
+                locationText = `📍 ${coords}`;
+            }
+        } else {
+            locationText = `📍 ${coords}`;
+        }
+        
+        countryInfoEl.innerHTML = locationText;
+    }
+    
+    // Calculate distance to target
+    if (distanceEl && userCoordinates) {
+        const distance = calculateDistance(
+            userCoordinates.lat, userCoordinates.lon,
+            target.lat, target.lon
+        );
+        distanceEl.textContent = distance >= 1000 
+            ? `${(distance / 1000).toFixed(1)}k km` 
+            : `${Math.round(distance)} km`;
+    } else if (distanceEl) {
+        distanceEl.textContent = '—';
+    }
+    
+    // Determine target type
+    if (typeEl) {
+        const locationKey = getLocationKey(target.lat, target.lon);
+        const pulse = pulseHistory.find(p => getLocationKey(p.lat, p.lon) === locationKey);
+        if (pulse) {
+            const isBot = pulse.source === 'auto' || pulse.source === 'seed';
+            const isPlayer = pulse.socketId && socket && pulse.socketId === socket.id;
+            if (isPlayer) {
+                typeEl.innerHTML = '👤 <span style="color: var(--primary);">You</span>';
+            } else if (isBot) {
+                typeEl.innerHTML = '🤖 <span style="color: #f59e0b;">Bot</span>';
+            } else {
+                typeEl.innerHTML = '👤 <span style="color: #10b981;">Player</span>';
+            }
+        } else {
+            typeEl.textContent = '—';
+        }
+    }
+    
+    // Show defense info if available
+    if (defenseEl) {
+        const locationKey = getLocationKey(target.lat, target.lon);
+        const pulse = pulseHistory.find(p => getLocationKey(p.lat, p.lon) === locationKey);
+        if (pulse && pulse.socketId && socket && pulse.socketId === socket.id) {
+            // This is player's own beacon - show their defense
+            defenseEl.style.display = 'block';
+            defenseEl.innerHTML = `<strong>Your Defenses:</strong> 🛡️ Shield Lvl ${defenseUpgrades.shield || 0} | 🔒 Armor Lvl ${defenseUpgrades.armor || 0} | 🚀 Intercept Lvl ${defenseUpgrades.interceptor || 0}`;
+        } else {
+            defenseEl.style.display = 'none';
+        }
+    }
+    
+    // Update age and points with real-time values
+    const targetTimestamp = getTimestampMs(target);
+    if (targetTimestamp) {
+        const updateTargetInfo = () => {
+            if (!selectedTarget || selectedTarget.id !== target.id) return; // Stop if target changed
+            
+            const age = Date.now() - targetTimestamp;
+            const minutes = Math.floor(age / 60000);
+            const seconds = Math.floor((age % 60000) / 1000);
+            const ageInMinutes = Math.floor(age / 60000);
+            const ageBonus = Math.min(ageInMinutes, 60);
+            const points = 10 + ageBonus;
+            
+            if (ageEl) {
+                ageEl.textContent = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+            }
+            if (pointsEl) {
+                pointsEl.textContent = points;
+            }
+        };
+        
+        // Initial update
+        updateTargetInfo();
+        
+        // Update every second
+        if (window.targetInfoInterval) {
+            clearInterval(window.targetInfoInterval);
+        }
+        window.targetInfoInterval = setInterval(updateTargetInfo, 1000);
     }
     
     if (typeof target.lat === 'number' && typeof target.lon === 'number') {
@@ -3650,6 +4016,44 @@ function setBattleTarget(target) {
 
 function clearBattleTarget() {
     selectedTarget = null;
+    
+    // Stop target info updates
+    if (window.targetInfoInterval) {
+        clearInterval(window.targetInfoInterval);
+        window.targetInfoInterval = null;
+    }
+    
+    // Reset compact display
+    const compactDisplay = document.getElementById('battleTargetNameCompact');
+    const countryInfoEl = document.getElementById('targetInfoCountry');
+    const ageEl = document.getElementById('targetInfoAge');
+    const pointsEl = document.getElementById('targetInfoPoints');
+    const distanceEl = document.getElementById('targetInfoDistance');
+    const typeEl = document.getElementById('targetInfoType');
+    const defenseEl = document.getElementById('targetInfoDefense');
+    
+    if (compactDisplay) {
+        compactDisplay.innerHTML = 'No target selected';
+    }
+    if (countryInfoEl) {
+        countryInfoEl.innerHTML = 'Click map to select';
+    }
+    if (ageEl) {
+        ageEl.textContent = '—';
+    }
+    if (pointsEl) {
+        pointsEl.textContent = '0';
+    }
+    if (distanceEl) {
+        distanceEl.textContent = '—';
+    }
+    if (typeEl) {
+        typeEl.textContent = '—';
+    }
+    if (defenseEl) {
+        defenseEl.style.display = 'none';
+    }
+    
     if (battleTargetNameEl) battleTargetNameEl.textContent = 'Select a target on map';
     if (targetHalo && map) {
         map.removeLayer(targetHalo);
@@ -3666,15 +4070,22 @@ function clearBattleTarget() {
     }
 }
 
-function startAttackCooldown() {
-    // Get attack duration (always 30s now)
-    const attackDuration = 30;
+function startAttackCooldown(attackDuration) {
+    const duration = typeof attackDuration === 'number' ? attackDuration : 10;
     
-    console.log(`⚔️ Starting attack cooldown: ${attackDuration}s`);
+    console.log(`⚔️ Starting attack cooldown: ${duration}s`);
     
     // Activate cooldown
     attackCooldownActive = true;
-    attackCooldownEndTime = Date.now() + (attackDuration * 1000);
+    attackCooldownEndTime = Date.now() + (duration * 1000);
+    
+    // Save cooldown state to localStorage
+    try {
+        localStorage.setItem('attackCooldownEndTime', attackCooldownEndTime.toString());
+        localStorage.setItem('attackCooldownActive', 'true');
+    } catch (e) {
+        console.warn('⚠️ Could not save cooldown state:', e);
+    }
     
     const cooldownEl = document.getElementById('battleCooldown');
     const pulseBtn = document.getElementById('pulseBtn');
@@ -3687,26 +4098,47 @@ function startAttackCooldown() {
     }
     if (cooldownEl) {
         cooldownEl.style.display = 'flex';
+        const timerEl = cooldownEl.querySelector('#cooldownTimer');
+        const labelEl = cooldownEl.querySelector('.cooldown-label');
+        if (timerEl) {
+            timerEl.textContent = `${duration}s`;
+        }
+        if (labelEl) {
+            labelEl.textContent = `⚔️ Attack in progress...`;
+        }
     }
     if (battleToggle) {
         battleToggle.disabled = true;
     }
     
-    // Draw ballistic trajectory
-    if (userCoordinates && selectedTarget) {
-        drawBallisticTrajectory(userCoordinates, selectedTarget, attackDuration);
-    }
+    // Attack animation will be handled by socket.on('attackEvent') when server broadcasts it
+    // No need to call renderAttackEvent here - it would duplicate the animation
     
+    console.log('🔄 Initial cooldown timer update');
     updateCooldownTimer();
     
+    if (attackCooldownInterval) {
+        clearInterval(attackCooldownInterval);
+        attackCooldownInterval = null;
+    }
+
+    console.log('⏱️ Starting interval for cooldown updates');
     attackCooldownInterval = setInterval(() => {
         const remaining = attackCooldownEndTime - Date.now();
+        console.log(`⏱️ Interval tick - remaining: ${remaining}ms`);
         if (remaining <= 0) {
+            console.log('⏹️ Cooldown finished, calling endAttackCooldown');
             endAttackCooldown();
         } else {
             updateCooldownTimer();
         }
-    }, 100);
+    }, 1000);
+
+    setTimeout(() => {
+        if (attackCooldownActive) {
+            endAttackCooldown();
+        }
+    }, (duration * 1000) + 200);
 }
 
 function drawBallisticTrajectory(from, to, duration) {
@@ -3753,7 +4185,7 @@ function drawBallisticTrajectory(from, to, duration) {
         console.log(`  Map has layer:`, map.hasLayer(trajectoryLine));
         
         console.log('  Step 4: Creating rocket marker...');
-        const rocket = createRocketMarker(from.lat, from.lon, to.lat, to.lon);
+        const rocket = createRocketMarker(from.lat, from.lon, to.lat, to.lon, '#EF4444');
         console.log(`  ✅ Rocket created:`, rocket);
         
         console.log('  Step 5: Adding rocket to map...');
@@ -3799,17 +4231,27 @@ function animateTrajectoryDrawing(allPoints, duration, target, trajectoryLine, p
             trajectoryLine.setStyle({ dashOffset: -progress * 60 });
         }
         
-        // Animate projectile marker along the path with smooth interpolation
+        // Animate projectile marker along the path with precise interpolation
         if (projectile && currentPoints.length > 1 && map && map.hasLayer(projectile)) {
-            const lastPoint = currentPoints[currentPoints.length - 1];
-            const prevPoint = currentPoints[Math.max(0, currentPoints.length - 2)];
-            projectile.setLatLng(lastPoint);
-            // Only update heading if there's meaningful movement to avoid jitter
-            const dLat = Math.abs(lastPoint[0] - prevPoint[0]);
-            const dLon = Math.abs(lastPoint[1] - prevPoint[1]);
-            if (dLat > 0.001 || dLon > 0.001) {
-                updateRocketHeading(projectile, prevPoint, lastPoint);
-            }
+            // Calculate exact position along trajectory using sub-frame interpolation
+            const exactIndex = progress * (allPoints.length - 1);
+            const floorIndex = Math.floor(exactIndex);
+            const ceilIndex = Math.min(Math.ceil(exactIndex), allPoints.length - 1);
+            const fraction = exactIndex - floorIndex;
+            
+            // Interpolate between trajectory points for smoother alignment
+            const point1 = allPoints[floorIndex];
+            const point2 = allPoints[ceilIndex];
+            const interpolatedLat = point1[0] + (point2[0] - point1[0]) * fraction;
+            const interpolatedLon = point1[1] + (point2[1] - point1[1]) * fraction;
+            const interpolatedPoint = [interpolatedLat, interpolatedLon];
+            
+            projectile.setLatLng(interpolatedPoint);
+            
+            // Use look-ahead for heading calculation (more accurate trajectory alignment)
+            const lookAheadIndex = Math.min(ceilIndex + 1, allPoints.length - 1);
+            const headingTarget = allPoints[lookAheadIndex];
+            updateRocketHeading(projectile, interpolatedPoint, headingTarget);
         }
         
         if (progress < 1) {
@@ -3876,18 +4318,33 @@ function updateCooldownTimer() {
     const remaining = Math.max(0, attackCooldownEndTime - Date.now());
     const seconds = Math.ceil(remaining / 1000);
     const timerEl = document.getElementById('cooldownTimer');
+    console.log(`🔄 updateCooldownTimer - seconds: ${seconds}, timerEl exists: ${!!timerEl}`);
     if (timerEl) {
         timerEl.textContent = seconds + 's';
+        console.log(`✅ Timer updated to: ${seconds}s`);
+    } else {
+        console.error('❌ cooldownTimer element not found!');
     }
 }
 
 function endAttackCooldown() {
+    console.log('🛑 endAttackCooldown called');
     attackCooldownActive = false;
     attackCooldownEndTime = null;
+    hideAdOverlay();
+    
+    // Clear localStorage
+    try {
+        localStorage.removeItem('attackCooldownEndTime');
+        localStorage.removeItem('attackCooldownActive');
+    } catch (e) {
+        console.warn('⚠️ Could not clear cooldown state:', e);
+    }
     
     if (attackCooldownInterval) {
         clearInterval(attackCooldownInterval);
         attackCooldownInterval = null;
+        console.log('✅ Interval cleared');
     }
     
     // Do not cancel or remove trajectories; allow all to finish
@@ -3903,6 +4360,12 @@ function endAttackCooldown() {
     if (pulseBtn) {
         pulseBtn.style.display = 'flex';
         pulseBtn.disabled = false;
+        if (battleModeEnabled) {
+            pulseBtn.textContent = '🎯 Select target';
+            pulseBtn.classList.remove('pulse-ready');
+        } else {
+            pulseBtn.textContent = '📡 Deploy Beacon';
+        }
     }
     if (battleToggle) {
         battleToggle.disabled = false;
@@ -4087,47 +4550,55 @@ function createArcPoints(start, end, steps = 48) {
     return points;
 }
 
-function createRocketIcon(angle) {
-    // Convert geographic bearing (0° = North) to CSS rotation (0° = East)
+function createRocketIcon(angle, color = '#EF4444', scale = 1, type = 'pulse') {
+    let width = 15.4, height = 15.4;
+    if (type === 'laser') { width = 17.7; height = 17.7; }
+    if (type === 'emp')   { width = 20;   height = 20;   }
+    const svgTransform = 'translate(256, 256) translate(120, 0) matrix(-1, 0, 0, 1, 0, 0) rotate(45) scale(1.35) translate(-256, -256)';
     const cssAngle = angle + 90;
-    
     return L.divIcon({
-        className: 'rocket-icon',
+        className: '',
         html: `
-            <div style="width: 16px; height: 16px; transform: rotate(${cssAngle}deg) translateZ(0); transform-origin: 50% 50%; will-change: transform;">
-                <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Simple arrow pointing right -->
-                    <path d="M 2 8 L 12 8 L 14 5 L 12 8 L 14 11 Z" fill="#EF4444" stroke="#DC2626" stroke-width="1.5" stroke-linejoin="round"/>
-                </svg>
-            </div>
+            <svg width="${width}" height="${height}" viewBox="-166.4 -166.4 844.8 844.8" xmlns="http://www.w3.org/2000/svg" style="display:block; margin:0 auto 2px auto; color: ${color}; transform: rotate(${cssAngle}deg);" aria-hidden="true">
+                <g transform="${svgTransform}">
+                    <path fill="currentColor" stroke="currentColor" stroke-width="0.00512" d="M511.317,0.683c-43.328-3.938-75.594,9.047-112.063,45.516l66.547,66.547 C502.286,76.261,515.255,44.026,511.317,0.683z"></path>
+                    <polygon fill="currentColor" stroke="currentColor" stroke-width="0.00512" points="381.161,64.292 314.021,131.433 249.239,115.667 221.239,143.683 261.505,183.964 126.536,318.917 44.177,317.245 0.005,361.401 53.692,415.12 119.661,349.151 129.88,359.354 47.567,441.667 70.349,464.433 152.646,382.12 162.849,392.339 96.88,458.292 150.599,511.995 194.755,467.808 193.083,385.464 328.036,250.495 368.302,290.776 396.333,262.761 380.583,197.979 447.708,130.839 "></polygon>
+                </g>
+            </svg>
         `,
-        iconSize: [16, 16],
-        iconAnchor: [8, 8]
+        iconSize: [width, height],
+        iconAnchor: [width / 2, height / 2]
     });
 }
 
-function createRocketMarker(fromLat, fromLon, toLat, toLon) {
+function createRocketMarker(fromLat, fromLon, toLat, toLon, color = '#EF4444', scale = 1, attackType = 'pulse') {
     // Calculate initial heading from trajectory direction
     const dLat = toLat - fromLat;
     const dLon = toLon - fromLon;
     // Calculate geographic bearing (0° = North)
     const geoAngle = Math.atan2(dLon, dLat) * 180 / Math.PI;
     // createRocketIcon will convert to CSS rotation internally
-    
-    return L.marker([fromLat, fromLon], {
-        icon: createRocketIcon(geoAngle),
+    const marker = L.marker([fromLat, fromLon], {
+        icon: createRocketIcon(geoAngle, color, scale, attackType),
         interactive: false
     });
+    marker.__rocketScale = scale;
+    marker.__rocketColor = color;
+    marker.__rocketType = attackType;
+    return marker;
 }
 
-function updateRocketHeading(rocketMarker, fromPoint, toPoint) {
+function updateRocketHeading(rocketMarker, fromPoint, toPoint, color = '#EF4444', scale, attackType) {
     if (!rocketMarker || !fromPoint || !toPoint) return;
     const dLat = toPoint[0] - fromPoint[0];
     const dLon = toPoint[1] - fromPoint[1];
     // Calculate geographic bearing (0° = North)
     const geoAngle = Math.atan2(dLon, dLat) * 180 / Math.PI;
     // createRocketIcon will convert to CSS rotation internally
-    rocketMarker.setIcon(createRocketIcon(geoAngle));
+    const resolvedColor = color || rocketMarker.__rocketColor || '#EF4444';
+    const resolvedScale = typeof scale === 'number' ? scale : (rocketMarker.__rocketScale || 1);
+    const resolvedType = attackType || rocketMarker.__rocketType || 'pulse';
+    rocketMarker.setIcon(createRocketIcon(geoAngle, resolvedColor, resolvedScale, resolvedType));
 }
 
 function createExplosion(coords) {
@@ -4210,7 +4681,9 @@ function destroyTarget(target) {
         });
     }
 
-    clearBattleTarget();
+    if (selectedTarget && selectedTarget.id === target.id) {
+        clearBattleTarget();
+    }
     updateGlobalStats();
     updateBattleStats();
 }
@@ -4226,7 +4699,7 @@ function addBattleActivity(target) {
         timestamp: time.toISOString(),
         targetName,
         locationLabel: '',
-        title: 'Battle Pulse'
+        title: 'Battle Attack'
     };
 
     activityHistory.push(activity);
@@ -4272,7 +4745,7 @@ function renderActivityItem(activity) {
         return item;
     }
 
-    const countryName = activity.countryName || (countryCoordinates[activity.country] && countryCoordinates[activity.country].name) || activity.country;
+    const countryName = normalizeCountryName(activity.countryName || (countryCoordinates[activity.country] && countryCoordinates[activity.country].name) || activity.country);
     const coords = activity.coords || (activity.lat && activity.lon ? `${activity.lat.toFixed(2)}°, ${activity.lon.toFixed(2)}°` : 'Unknown location');
     const flag = getCountryFlag(activity.country);
     const sourceIcon = activity.source === 'auto' || activity.title?.includes('🤖') ? '🤖' : '👤';
@@ -4309,19 +4782,11 @@ function enrichBattleLocation(activity, lat, lon, timestampMs, locationKey) {
         return;
     }
 
-    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
-    fetch(url, {
-        headers: {
-            'Accept': 'application/json'
-        }
-    })
-        .then(res => res.json())
-        .then(data => {
-            const locationLabel = formatLocationLabel(data);
-            locationCache.set(cacheKey, locationLabel);
-            updateBattleActivityLocation(activity, locationLabel, timestampMs);
-        })
-        .catch(err => console.log('Could not get target address:', err));
+    // Skip Nominatim reverse geocoding (causes timeout/CORS issues)
+    // Use coordinates as fallback label
+    const locationLabel = `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
+    locationCache.set(cacheKey, locationLabel);
+    updateBattleActivityLocation(activity, locationLabel, timestampMs);
 }
 
 function formatLocationLabel(data) {
@@ -4402,7 +4867,7 @@ function addActivity(country, data) {
     const time = new Date();
     const safeCountry = country || 'Unknown';
     const { lat, lon } = normalizeCoords(data?.lat, data?.lon);
-    const countryName = (countryCoordinates[safeCountry] && countryCoordinates[safeCountry].name) || safeCountry;
+    const countryName = normalizeCountryName((countryCoordinates[safeCountry] && countryCoordinates[safeCountry].name) || safeCountry);
     const coords = Number.isFinite(lat) && Number.isFinite(lon) ? `${lat.toFixed(2)}°, ${lon.toFixed(2)}°` : 'Unknown location';
     
     console.log('Creating activity item for:', countryName, coords);
@@ -4738,12 +5203,12 @@ function animatePulseOnMap(coords) {
 // ============ Scoring System ============
 function calculateTargetPoints(targetAge, attackCost = 0) {
     // NEW REWARD FORMULA:
-    // Base points: attack cost * 3 (риск/награда баланс)
+    // Base points: attack cost * 3 (risk/reward balance)
     // Age multiplier: +1 point per minute up to 60 minutes
     const basePoints = attackCost * 3;
     const ageInMinutes = Math.floor(targetAge / 60000); // Convert ms to minutes
     const ageBonus = Math.min(ageInMinutes, 60); // Cap at 60 bonus points
-    return Math.max(basePoints + ageBonus, 5); // Minimum 5 points за безплатни атаки
+    return Math.max(basePoints + ageBonus, 5); // Minimum 5 points for free attacks
 }
 
 function addScore(points, country) {
@@ -4791,16 +5256,6 @@ function updateScoreDisplay() {
         console.log('💯 Display updated - personalScore:', personalScore, 'Element:', scoreEl);
     } else {
         console.log('퉪️ personalScore element not found!');
-    }
-    
-    // Update user profile widget with country score
-    if (currentUser && currentUser.country) {
-        const countryScoreEl = document.getElementById('userCountryScore');
-        if (countryScoreEl) {
-            const countryScore = countryScores[currentUser.country] || 0;
-            const flag = getCountryFlag(currentUser.country);
-            countryScoreEl.innerHTML = `${flag} ${countryScore.toLocaleString()} pts`;
-        }
     }
     
     updateCountryLeaderboard();
@@ -4946,7 +5401,9 @@ function showTargetInfo(target) {
     
     if (pointsEl && targetTimestamp) {
         const age = Date.now() - targetTimestamp;
-        const points = calculateTargetPoints(age);
+        const ageInMinutes = Math.floor(age / 60000);
+        const ageBonus = Math.min(ageInMinutes, 60);
+        const points = 10 + ageBonus; // Match server formula exactly
         pointsEl.textContent = points;
     }
     
@@ -5256,19 +5713,16 @@ function closeSettingsModal() {
 
 function loadSettings() {
     // Load sound setting
-    const soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+    const savedSoundEnabled = localStorage.getItem('soundEnabled') !== 'false';
     const soundToggle = document.getElementById('soundToggle');
-    if (soundToggle) soundToggle.checked = soundEnabled;
+    if (soundToggle) soundToggle.checked = savedSoundEnabled;
+    soundEnabled = savedSoundEnabled;
+    window.soundEnabled = savedSoundEnabled;
     
     // Load theme setting
     const theme = localStorage.getItem('theme') || 'dark';
     const themeSelect = document.getElementById('themeSelect');
     if (themeSelect) themeSelect.value = theme;
-    
-    // Load notifications setting
-    const notificationsEnabled = localStorage.getItem('notificationsEnabled') !== 'false';
-    const notificationsToggle = document.getElementById('notificationsToggle');
-    if (notificationsToggle) notificationsToggle.checked = notificationsEnabled;
     
     // Load performance setting
     const performanceMode = localStorage.getItem('performanceMode') === 'true';
@@ -5279,21 +5733,17 @@ function loadSettings() {
 function saveSettings() {
     const soundToggle = document.getElementById('soundToggle');
     const themeSelect = document.getElementById('themeSelect');
-    const notificationsToggle = document.getElementById('notificationsToggle');
     const performanceToggle = document.getElementById('performanceToggle');
     
     if (soundToggle) {
-        localStorage.setItem('soundEnabled', soundToggle.checked);
-        window.soundEnabled = soundToggle.checked;
+        soundEnabled = soundToggle.checked;
+        localStorage.setItem('soundEnabled', soundEnabled);
+        window.soundEnabled = soundEnabled;
     }
     
     if (themeSelect) {
         localStorage.setItem('theme', themeSelect.value);
         applyTheme(themeSelect.value);
-    }
-    
-    if (notificationsToggle) {
-        localStorage.setItem('notificationsEnabled', notificationsToggle.checked);
     }
     
     if (performanceToggle) {
@@ -5361,14 +5811,12 @@ function setupModals() {
     const settingsBtn = document.getElementById('settingsBtn');
     const soundToggle = document.getElementById('soundToggle');
     const themeSelect = document.getElementById('themeSelect');
-    const notificationsToggle = document.getElementById('notificationsToggle');
     const performanceToggle = document.getElementById('performanceToggle');
     const resetDataBtn = document.getElementById('resetDataBtn');
     
     // Save settings on change
     if (soundToggle) soundToggle.addEventListener('change', saveSettings);
     if (themeSelect) themeSelect.addEventListener('change', saveSettings);
-    if (notificationsToggle) notificationsToggle.addEventListener('change', saveSettings);
     if (performanceToggle) performanceToggle.addEventListener('change', saveSettings);
     if (resetDataBtn) resetDataBtn.addEventListener('click', resetData);
     

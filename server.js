@@ -1,7 +1,9 @@
 const express = require('express');
 const http = require('http');
+const https = require('https');
 const socketIO = require('socket.io');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -12,9 +14,289 @@ const io = socketIO(server, {
   }
 });
 
+// VERSION MARKER - Change this to verify deployment
+const SERVER_VERSION = 'v3.0-TRUE-GEOCODING-' + Date.now();
+console.log('🚀🚀🚀 SERVER VERSION:', SERVER_VERSION, '🚀🚀🚀');
+console.log('🌍 Using real-time reverse geocoding from server');
+console.log('📍 True global spawn with accurate country/address detection\n');
+
+// Geocoding cache to avoid repeated API calls
+const geocodeCache = new Map();
+let lastGeocodeTime = 0;
+
+// Comprehensive country boundaries database
+const countryBoundaries = {
+  'US': { name: 'United States of America', bounds: [[25.8, -125], [49.4, -66.9]] },
+  'CA': { name: 'Canada', bounds: [[41.7, -141], [83.1, -52.6]] },
+  'MX': { name: 'Mexico', bounds: [[14.5, -117.1], [31.0, -86.8]] },
+  'BR': { name: 'Brazil', bounds: [[-33.8, -73.9], [5.2, -34.8]] },
+  'AR': { name: 'Argentina', bounds: [[-56.2, -73.6], [-21.8, -53.6]] },
+  'CL': { name: 'Chile', bounds: [[-56.5, -81.4], [-17.5, -66.4]] },
+  'CO': { name: 'Colombia', bounds: [[-4.2, -77.3], [12.5, -66.9]] },
+  'PE': { name: 'Peru', bounds: [[-18, -81.5], [0.5, -68.7]] },
+  'GB': { name: 'United Kingdom', bounds: [[50, -7.6], [58.6, 1.8]] },
+  'FR': { name: 'France', bounds: [[41.3, -5.2], [50.0, 6.0]] },
+  'DE': { name: 'Germany', bounds: [[47.3, 5.8], [55.1, 15.1]] },
+  'IT': { name: 'Italy', bounds: [[36.6, 6.6], [47.0, 18.5]] },
+  'ES': { name: 'Spain', bounds: [[36.0, -9.3], [43.9, 3.0]] },
+  'PT': { name: 'Portugal', bounds: [[37.2, -9.5], [42.0, -6.2]] },
+  'NL': { name: 'Netherlands', bounds: [[50.7, 3.4], [53.6, 7.2]] },
+  'BE': { name: 'Belgium', bounds: [[49.5, 2.4], [51.5, 6.4]] },
+  'CH': { name: 'Switzerland', bounds: [[45.8, 5.9], [47.8, 10.5]] },
+  'AT': { name: 'Austria', bounds: [[46.4, 9.5], [49.0, 17.2]] },
+  'PL': { name: 'Poland', bounds: [[49.0, 14.1], [54.8, 24.1]] },
+  'CZ': { name: 'Czech Republic', bounds: [[48.6, 12.1], [51.0, 18.9]] },
+  'RO': { name: 'Romania', bounds: [[43.7, 20.3], [48.2, 29.6]] },
+  'BG': { name: 'Bulgaria', bounds: [[41.2, 22.4], [44.2, 28.6]] },
+  'GR': { name: 'Greece', bounds: [[34.8, 19.4], [41.7, 28.2]] },
+  'TR': { name: 'Turkey', bounds: [[35.8, 26.1], [42.8, 44.8]] },
+  'RU': { name: 'Russia', bounds: [[50.0, 19.6], [81.9, 169.6]] },
+  'UA': { name: 'Ukraine', bounds: [[43.4, 22.2], [52.4, 40.2]] },
+  'KZ': { name: 'Kazakhstan', bounds: [[40.6, 51.9], [68.8, 87.3]] },
+  'UZ': { name: 'Uzbekistan', bounds: [[37.2, 55.4], [45.6, 73.2]] },
+  'TM': { name: 'Turkmenistan', bounds: [[35.3, 52.5], [42.8, 66.7]] },
+  'KG': { name: 'Kyrgyzstan', bounds: [[39.2, 69.3], [43.3, 80.3]] },
+  'TJ': { name: 'Tajikistan', bounds: [[36.7, 67.5], [37.5, 75.5]] },
+  'AF': { name: 'Afghanistan', bounds: [[29.3, 60.5], [38.5, 75.2]] },
+  'PK': { name: 'Pakistan', bounds: [[23.7, 60.9], [37.1, 77.8]] },
+  'IN': { name: 'India', bounds: [[8.1, 68.2], [28.0, 97.4]] },
+  'BD': { name: 'Bangladesh', bounds: [[20.7, 88.0], [26.6, 92.7]] },
+  'NP': { name: 'Nepal', bounds: [[26.4, 80.1], [30.4, 88.2]] },
+  'BT': { name: 'Bhutan', bounds: [[27.0, 88.8], [28.3, 92.1]] },
+  'LK': { name: 'Sri Lanka', bounds: [[5.9, 79.7], [7.7, 81.9]] },
+  'MM': { name: 'Myanmar', bounds: [[9.2, 92.2], [20.0, 101.2]] },
+  'TH': { name: 'Thailand', bounds: [[5.6, 97.3], [20.5, 105.6]] },
+  'LA': { name: 'Laos', bounds: [[13.9, 100.1], [22.5, 107.6]] },
+  'KH': { name: 'Cambodia', bounds: [[10.4, 102.3], [14.7, 107.6]] },
+  'VN': { name: 'Vietnam', bounds: [[8.6, 102.1], [23.4, 109.5]] },
+  'MY': { name: 'Malaysia', bounds: [[0.9, 99.6], [6.4, 119.3]] },
+  'SG': { name: 'Singapore', bounds: [[1.3, 103.6], [1.5, 104.0]] },
+  'ID': { name: 'Indonesia', bounds: [[-10.9, 95.3], [5.9, 141.0]] },
+  'PH': { name: 'Philippines', bounds: [[5.0, 119.0], [19.0, 126.6]] },
+  'TW': { name: 'Taiwan', bounds: [[21.9, 120.0], [25.3, 121.9]] },
+  'JP': { name: 'Japan', bounds: [[30.4, 129.0], [45.6, 145.8]] },
+  'KR': { name: 'South Korea', bounds: [[33.1, 124.6], [38.6, 131.9]] },
+  'KP': { name: 'North Korea', bounds: [[37.0, 124.1], [42.9, 130.8]] },
+  'CN': { name: 'China', bounds: [[18.2, 73.5], [54.0, 119.8]] },
+  'MN': { name: 'Mongolia', bounds: [[41.6, 87.7], [50.3, 119.9]] },
+  'AU': { name: 'Australia', bounds: [[-43.6, 112.9], [-10.7, 154.3]] },
+  'NZ': { name: 'New Zealand', bounds: [[-47.3, 166.4], [-34.4, 178.6]] },
+  'FJ': { name: 'Fiji', bounds: [[-18.3, 177.1], [-16.1, -177.0]] },
+  'PG': { name: 'Papua New Guinea', bounds: [[-12.2, 141.0], [-1.4, 159.0]] },
+  'ZA': { name: 'South Africa', bounds: [[-34.8, 16.3], [-22.1, 32.8]] },
+  'EG': { name: 'Egypt', bounds: [[21.7, 24.7], [31.6, 36.9]] },
+  'NG': { name: 'Nigeria', bounds: [[4.4, 2.7], [13.9, 14.7]] },
+  'ET': { name: 'Ethiopia', bounds: [[3.4, 33.0], [14.9, 47.8]] },
+  'KE': { name: 'Kenya', bounds: [[-4.7, 33.9], [5.0, 41.9]] },
+  'TZ': { name: 'Tanzania', bounds: [[-11.7, 29.3], [-0.9, 40.3]] },
+  'UG': { name: 'Uganda', bounds: [[-1.5, 29.6], [4.2, 35.4]] },
+  'DZ': { name: 'Algeria', bounds: [[18.9, -8.7], [37.1, 12.0]] },
+  'MA': { name: 'Morocco', bounds: [[27.1, -13.2], [35.9, -2.6]] },
+  'IL': { name: 'Israel', bounds: [[31.0, 34.2], [33.3, 35.9]] },
+  'SA': { name: 'Saudi Arabia', bounds: [[16.4, 34.4], [32.1, 55.9]] },
+  'AE': { name: 'United Arab Emirates', bounds: [[22.5, 51.5], [26.2, 56.4]] },
+  'IQ': { name: 'Iraq', bounds: [[29.1, 38.8], [37.4, 48.6]] },
+  'IR': { name: 'Iran', bounds: [[25.1, 44.0], [39.8, 63.3]] },
+  'SY': { name: 'Syria', bounds: [[32.3, 35.7], [37.3, 42.4]] },
+  'JO': { name: 'Jordan', bounds: [[31.2, 34.9], [32.8, 39.3]] },
+  'LB': { name: 'Lebanon', bounds: [[33.1, 35.1], [34.6, 36.6]] },
+  'PS': { name: 'Palestine', bounds: [[31.4, 34.2], [32.5, 35.5]] },
+  'SV': { name: 'El Salvador', bounds: [[12.8, -91.0], [14.5, -88.0]] },
+  'GT': { name: 'Guatemala', bounds: [[13.7, -92.2], [17.8, -88.2]] },
+  'BZ': { name: 'Belize', bounds: [[15.5, -89.2], [18.5, -87.5]] },
+  'HN': { name: 'Honduras', bounds: [[12.9, -89.4], [17.6, -83.1]] },
+  'NI': { name: 'Nicaragua', bounds: [[10.7, -87.6], [15.0, -83.6]] },
+  'CR': { name: 'Costa Rica', bounds: [[8.0, -85.9], [11.2, -82.5]] },
+  'PA': { name: 'Panama', bounds: [[7.2, -82.9], [10.0, -77.2]] },
+  'CU': { name: 'Cuba', bounds: [[19.8, -84.9], [20.5, -74.1]] },
+  'DO': { name: 'Dominican Republic', bounds: [[17.6, -74.5], [19.9, -68.3]] },
+  'HT': { name: 'Haiti', bounds: [[18.0, -74.5], [20.1, -71.9]] },
+  'JM': { name: 'Jamaica', bounds: [[17.7, -78.4], [18.5, -76.7]] },
+  'PR': { name: 'Puerto Rico', bounds: [[17.9, -67.3], [18.6, -65.2]] },
+  'VE': { name: 'Venezuela', bounds: [[0.6, -73.5], [12.8, -59.8]] },
+  'GY': { name: 'Guyana', bounds: [[1.2, -61.4], [8.6, -56.5]] },
+  'SR': { name: 'Suriname', bounds: [[1.8, -58.0], [6.0, -53.9]] },
+  'GF': { name: 'French Guiana', bounds: [[2.1, -54.6], [5.8, -51.6]] },
+  'EC': { name: 'Ecuador', bounds: [[-5.0, -81.1], [1.4, -75.2]] },
+  'BO': { name: 'Bolivia', bounds: [[-22.9, -69.6], [-9.8, -57.5]] },
+  'PY': { name: 'Paraguay', bounds: [[-27.6, -63.1], [-19.3, -54.3]] },
+  'UY': { name: 'Uruguay', bounds: [[-34.9, -58.4], [-30.1, -53.2]] },
+  'NO': { name: 'Norway', bounds: [[57.9, 4.7], [71.2, 31.3]] },
+  'SE': { name: 'Sweden', bounds: [[55.4, 10.9], [69.1, 24.2]] },
+  'FI': { name: 'Finland', bounds: [[59.8, 19.1], [70.1, 31.6]] },
+  'DK': { name: 'Denmark', bounds: [[54.6, 8.1], [57.7, 12.7]] },
+  'IS': { name: 'Iceland', bounds: [[63.4, -24.5], [66.5, -13.5]] },
+  'HU': { name: 'Hungary', bounds: [[45.7, 16.1], [48.6, 22.9]] },
+  'SK': { name: 'Slovakia', bounds: [[47.7, 16.9], [49.6, 22.3]] },
+  'SI': { name: 'Slovenia', bounds: [[45.4, 13.4], [46.8, 16.6]] },
+  'HR': { name: 'Croatia', bounds: [[42.4, 12.4], [47.2, 19.4]] },
+  'BiH': { name: 'Bosnia and Herzegovina', bounds: [[42.6, 15.7], [45.3, 19.7]] },
+  'RS': { name: 'Serbia', bounds: [[42.2, 18.8], [46.2, 23.0]] },
+  'ME': { name: 'Montenegro', bounds: [[41.9, 18.4], [43.5, 20.4]] },
+  'MK': { name: 'North Macedonia', bounds: [[40.8, 20.5], [42.4, 22.9]] },
+  'AL': { name: 'Albania', bounds: [[39.6, 19.3], [42.7, 21.0]] }
+};
+
+// Simplified point-in-polygon algorithm
+function getCountryFromCoordinates(lat, lon) {
+  // Check each country boundary
+  for (const [code, data] of Object.entries(countryBoundaries)) {
+    const [[minLat, minLon], [maxLat, maxLon]] = data.bounds;
+    if (lat >= minLat && lat <= maxLat && lon >= minLon && lon <= maxLon) {
+      return { code, name: data.name };
+    }
+  }
+  // If no exact match (water), find nearest country
+  return findNearestCountry(lat, lon);
+}
+
+function findNearestCountry(lat, lon) {
+  let minDistance = Infinity;
+  let nearestCountry = { code: null, name: 'Unknown' };
+  
+  for (const [code, data] of Object.entries(countryBoundaries)) {
+    const [[minLat, minLon], [maxLat, maxLon]] = data.bounds;
+    
+    // Calculate distance to nearest point on country boundary
+    const closestLat = Math.max(minLat, Math.min(lat, maxLat));
+    const closestLon = Math.max(minLon, Math.min(lon, maxLon));
+    
+    // Simple Euclidean distance (good enough for finding nearest)
+    const distance = Math.sqrt(
+      Math.pow(lat - closestLat, 2) + 
+      Math.pow(lon - closestLon, 2)
+    );
+    
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearestCountry = { code, name: data.name };
+    }
+  }
+  
+  return nearestCountry;
+}
+
+// Server-side reverse geocoding with enhanced precision
+// Uses BigDataCloud API (free, no rate limits, no API key required)
+async function reverseGeocodeServer(lat, lon) {
+  const cacheKey = `${lat.toFixed(5)},${lon.toFixed(5)}`; // Higher precision cache key
+  
+  if (geocodeCache.has(cacheKey)) {
+    return geocodeCache.get(cacheKey);
+  }
+  
+  return new Promise((resolve) => {
+    try {
+      // Use BigDataCloud reverse geocoding API (free, reliable, no rate limits)
+      const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
+      
+      https.get(url, {
+        headers: {
+          'User-Agent': 'GlobalPulseMap-Server/3.0 (Node.js)',
+          'Accept': 'application/json'
+        }
+      }, (response) => {
+        let data = '';
+        
+        response.on('data', (chunk) => {
+          data += chunk;
+        });
+        
+        response.on('end', () => {
+          try {
+            const parsed = JSON.parse(data);
+            
+            // BigDataCloud response structure
+            let countryCode = parsed.countryCode || null;
+            let countryName = parsed.countryName || 'Unknown';
+            const city = parsed.city || parsed.locality || '';
+            const state = parsed.principalSubdivision || '';
+            const county = parsed.localityInfo?.administrative?.[0]?.name || '';
+            
+            // If BigDataCloud returns null countryCode (water), use nearest country
+            if (!countryCode) {
+              const detected = getCountryFromCoordinates(lat, lon);
+              countryCode = detected.code;
+              countryName = detected.name;
+              console.log(`🌊 Water detected at (${lat.toFixed(4)}, ${lon.toFixed(4)}) → nearest country: ${countryName} [${countryCode}]`);
+            }
+            
+            // Build formatted address
+            const addressParts = [];
+            if (city) addressParts.push(city);
+            if (state && state !== city) addressParts.push(state);
+            if (countryName && countryName !== 'Unknown') addressParts.push(countryName);
+            
+            const formattedAddress = addressParts.length > 0 
+              ? addressParts.join(', ')
+              : `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`;
+            
+            const result = {
+              countryCode: countryCode,
+              countryName: countryName,
+              city: city,
+              state: state,
+              county: county,
+              road: '',
+              houseNumber: '',
+              postcode: '',
+              quarter: '',
+              formattedAddress: formattedAddress,
+              displayName: formattedAddress,
+              isWater: !countryCode,
+              precision: 'bigdatacloud'
+            };
+            
+            console.log(`🗺️ Geocoded (${lat.toFixed(4)}, ${lon.toFixed(4)}) → ${formattedAddress} [${countryCode}]`);
+            
+            geocodeCache.set(cacheKey, result);
+            resolve(result);
+          } catch (error) {
+            console.warn(`⚠️ Geocoding parse error for (${lat.toFixed(4)}, ${lon.toFixed(4)}):`, error.message);
+            resolve(getFallbackResult(lat, lon));
+          }
+        });
+      }).on('error', (error) => {
+        console.warn(`⚠️ Geocoding request failed for (${lat.toFixed(4)}, ${lon.toFixed(4)}):`, error.message);
+        resolve(getFallbackResult(lat, lon));
+      });
+    } catch (error) {
+      console.warn(`⚠️ Geocoding failed for (${lat.toFixed(4)}, ${lon.toFixed(4)}):`, error.message);
+      resolve(getFallbackResult(lat, lon));
+    }
+  });
+}
+
+function getFallbackResult(lat, lon) {
+  // Fallback: use our own country detection by coordinates
+  const detected = getCountryFromCoordinates(lat, lon);
+  const result = {
+    countryCode: detected.code,
+    countryName: detected.name,
+    city: '',
+    state: '',
+    county: '',
+    road: '',
+    houseNumber: '',
+    postcode: '',
+    quarter: '',
+    formattedAddress: detected.name !== 'Unknown' ? detected.name : `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`,
+    displayName: detected.name !== 'Unknown' ? detected.name : `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`,
+    isWater: detected.code === null,
+    precision: 'fallback-bounds'
+  };
+  
+  geocodeCache.set(`${lat.toFixed(5)},${lon.toFixed(5)}`, result);
+  return result;
+}
+
+
 // Serve static files
 app.use(express.static(path.join(__dirname)));
 app.use(express.json());
+
+// Game state file path
+const GAME_STATE_FILE = path.join(__dirname, 'gamestate.json');
 
 // In-memory storage
 const pulseData = {
@@ -22,6 +304,56 @@ const pulseData = {
   countries: {},
   pulseHistory: [] // Store all pulses with timestamps
 };
+
+// Save game state to file
+function saveGameStateToFile() {
+  try {
+    const stateToSave = {
+      global: pulseData.global,
+      countries: pulseData.countries,
+      pulseHistory: pulseData.pulseHistory.map(pulse => ({
+        lat: pulse.lat,
+        lon: pulse.lon,
+        timestamp: pulse.timestamp,
+        source: pulse.source,
+        country: pulse.country,
+        socketId: pulse.socketId,
+        geoData: pulse.geoData
+      })),
+      savedAt: new Date().toISOString()
+    };
+    fs.writeFileSync(GAME_STATE_FILE, JSON.stringify(stateToSave, null, 2));
+    console.log(`💾 Game state saved: ${pulseData.pulseHistory.length} pulses`);
+  } catch (err) {
+    console.error('❌ Error saving game state:', err);
+  }
+}
+
+// Load game state from file
+function loadGameStateFromFile() {
+  try {
+    if (fs.existsSync(GAME_STATE_FILE)) {
+      const data = fs.readFileSync(GAME_STATE_FILE, 'utf8');
+      const savedState = JSON.parse(data);
+      
+      pulseData.global = savedState.global || 0;
+      pulseData.countries = savedState.countries || {};
+      pulseData.pulseHistory = (savedState.pulseHistory || []).map(pulse => ({
+        ...pulse,
+        timestamp: new Date(pulse.timestamp)
+      }));
+      
+      console.log(`📥 Game state loaded: ${pulseData.pulseHistory.length} pulses from ${savedState.savedAt}`);
+      return true;
+    }
+  } catch (err) {
+    console.error('❌ Error loading game state:', err);
+  }
+  return false;
+}
+
+// Auto-save game state every 5 minutes
+setInterval(saveGameStateToFile, 5 * 60 * 1000);
 
 // User data storage (in production, use a real database)
 const userData = new Map(); // userId -> { provider, id, name, avatar, country, personalScore, achievements, history }
@@ -63,60 +395,13 @@ function removeLocation(locationKey, reason = 'trim') {
     destroyedTargets.delete(locationKey);
   }
 
+  // Save state after removing pulse
+  saveGameStateToFile();
+
   io.emit('targetRemoved', { locationKey, reason });
 }
 
 // No rate limiting - completely unlimited
-
-// Enhanced geolocation with country boundary detection
-function getCountryFromCoordinates(lat, lon) {
-  const countryBounds = {
-    'BG': { latMin: 41.2353, latMax: 44.2168, lonMin: 22.3571, lonMax: 28.5681, name: 'Bulgaria' },
-    'RO': { latMin: 43.6884, latMax: 48.2208, lonMin: 20.2619, lonMax: 29.6279, name: 'Romania' },
-    'GR': { latMin: 34.8022, latMax: 41.7488, lonMin: 19.3731, lonMax: 28.2432, name: 'Greece' },
-    'TR': { latMin: 35.8081, latMax: 42.7939, lonMin: 26.0433, lonMax: 44.7939, name: 'Turkey' },
-    'DE': { latMin: 47.2701, latMax: 55.0996, lonMin: 5.8663, lonMax: 15.0419, name: 'Germany' },
-    'FR': { latMin: 42.4314, latMax: 51.1242, lonMin: -5.1422, lonMax: 8.2275, name: 'France' },
-    'IT': { latMin: 36.6230, latMax: 47.0921, lonMin: 6.6272, lonMax: 18.5203, name: 'Italy' },
-    'ES': { latMin: 36.0021, latMax: 43.7483, lonMin: -9.2393, lonMax: 3.0910, name: 'Spain' },
-    'GB': { latMin: 50.0229, latMax: 58.6350, lonMin: -7.5721, lonMax: 1.7628, name: 'United Kingdom' },
-    'US': { latMin: 24.5210, latMax: 49.3844, lonMin: -125.0011, lonMax: -66.9326, name: 'United States' },
-    'CA': { latMin: 41.6765, latMax: 83.1096, lonMin: -141.0017, lonMax: -52.6480, name: 'Canada' },
-    'MX': { latMin: 14.5345, latMax: 32.7186, lonMin: -117.1205, lonMax: -86.8108, name: 'Mexico' },
-    'BR': { latMin: -33.7683, latMax: 5.2419, lonMin: -73.9830, lonMax: -34.7725, name: 'Brazil' },
-    'JP': { latMin: 30.3966, latMax: 45.5514, lonMin: 130.4017, lonMax: 145.8369, name: 'Japan' },
-    'CN': { latMin: 18.2671, latMax: 53.5604, lonMin: 73.5057, lonMax: 135.0865, name: 'China' },
-    'IN': { latMin: 8.0883, latMax: 35.5047, lonMin: 68.1766, lonMax: 97.4025, name: 'India' },
-    'AU': { latMin: -43.6345, latMax: -10.6718, lonMin: 112.9211, lonMax: 154.3021, name: 'Australia' },
-    'ZA': { latMin: -34.8212, latMax: -22.0529, lonMin: 16.3449, lonMax: 32.8305, name: 'South Africa' },
-    'RU': { latMin: 41.1850, latMax: 81.8554, lonMin: 19.6389, lonMax: 169.6007, name: 'Russia' }
-  };
-
-  // First try bounds-based detection (most accurate)
-  for (const [code, bounds] of Object.entries(countryBounds)) {
-    if (lat >= bounds.latMin && lat <= bounds.latMax && lon >= bounds.lonMin && lon <= bounds.lonMax) {
-      return code;
-    }
-  }
-
-  // If not within any country bounds, map to nearest country boundary (avoid Unknown display)
-  let closest = 'Unknown';
-  let minDistance = Infinity;
-
-  for (const [code, bounds] of Object.entries(countryBounds)) {
-    const clampedLat = Math.min(Math.max(lat, bounds.latMin), bounds.latMax);
-    const clampedLon = Math.min(Math.max(lon, bounds.lonMin), bounds.lonMax);
-    const distance = Math.sqrt(
-      Math.pow(lat - clampedLat, 2) + Math.pow(lon - clampedLon, 2)
-    );
-    if (distance < minDistance) {
-      minDistance = distance;
-      closest = code;
-    }
-  }
-
-  return closest;
-}
 
 // Helper to get pulses by period
 function getPulsesByPeriod(period) {
@@ -343,14 +628,21 @@ function getTopPlayers(limit = 10) {
   return players;
 }
 
-function addPulse(lat, lon, source = 'client', socketId = null) {
+function addPulse(lat, lon, source = 'client', socketId = null, countryOverride = null, geoData = null) {
   const locationKey = getLocationKey(lat, lon);
   if (!locationKey) return;
 
-  // Get country from coordinates
+  // Use accurate country from geoData if available, otherwise use override or fallback
   let country = 'Unknown';
-  if (lat !== undefined && lon !== undefined) {
-    country = getCountryFromCoordinates(lat, lon);
+  if (geoData && geoData.countryCode) {
+    // Prefer accurate geocoded country code
+    country = geoData.countryCode;
+  } else if (countryOverride) {
+    country = countryOverride;
+  } else if (lat !== undefined && lon !== undefined) {
+    // Last resort: use basic detection (all countries by bounds)
+    const detected = getCountryFromCoordinates(lat, lon);
+    country = detected.code || 'Unknown';
   }
 
   // Revive location if it was destroyed
@@ -373,7 +665,7 @@ function addPulse(lat, lon, source = 'client', socketId = null) {
   pulseData.global++;
   incrementCountry(country);
 
-  // Store or update pulse in history (one per location)
+  // Store or update pulse in history (one per location) with full geo data
   const pulseEntry = {
     country: country,
     timestamp: new Date(),
@@ -382,7 +674,16 @@ function addPulse(lat, lon, source = 'client', socketId = null) {
     lon: lon,
     locationKey,
     source: source,  // 'client' for human players, 'auto' for auto-agent
-    socketId: socketId  // Store socket ID if provided
+    socketId: socketId,  // Store socket ID if provided
+    // Add detailed geo information if available
+    geoData: geoData ? {
+      countryCode: geoData.countryCode,
+      countryName: geoData.countryName,
+      city: geoData.city,
+      state: geoData.state,
+      road: geoData.road,
+      isWater: geoData.isWater
+    } : null
   };
 
   const existingIndex = pulseData.pulseHistory.findIndex(entry => {
@@ -396,7 +697,10 @@ function addPulse(lat, lon, source = 'client', socketId = null) {
     pulseData.pulseHistory.push(pulseEntry);
   }
 
-  // Broadcast to all clients
+  // Save state after adding pulse
+  saveGameStateToFile();
+
+  // Broadcast to all clients with full geo data
   io.emit('pulseUpdate', {
     global: pulseData.global,
     countries: pulseData.countries,
@@ -409,6 +713,35 @@ function addPulse(lat, lon, source = 'client', socketId = null) {
 }
 
 // ============ Auto-Agent Attack System ============
+const ATTACK_TYPES = {
+  pulse: { speedKps: 75 },
+  laser: { speedKps: 150 },
+  emp: { speedKps: 300 }
+};
+const ATTACK_TYPE_KEYS = Object.keys(ATTACK_TYPES);
+const getRandomAttackType = () => ATTACK_TYPE_KEYS[Math.floor(Math.random() * ATTACK_TYPE_KEYS.length)] || 'pulse';
+
+function toRad(value) {
+  return (value * Math.PI) / 180;
+}
+
+function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+    + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2))
+    * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function calculateAttackDurationSec(type, fromLat, fromLon, toLat, toLon) {
+  const distanceKm = calculateDistanceKm(fromLat, fromLon, toLat, toLon);
+  const speedKps = ATTACK_TYPES[type]?.speedKps || ATTACK_TYPES.pulse.speedKps;
+  const rawSeconds = distanceKm / speedKps;
+  return Math.max(4, Math.ceil(rawSeconds));
+}
 // ALL attacks (human and auto) are processed and broadcast to ALL clients
 // Clients then render the same trajectory visualization
 
@@ -552,11 +885,26 @@ function getRandomTargetInCountry(targetCountry) {
 function calculateTargetPoints(pulse) {
   // Calculate value of a target based on its age
   // Each point: 10 base + age bonus (1 per minute, max 60)
-  if (!pulse || !pulse.timestamp) return 0;
-  const ageMs = Date.now() - pulse.timestamp.getTime();
+  if (!pulse || !pulse.timestamp) return 10; // Return base points if no timestamp
+  
+  // Handle both Date objects and ISO strings
+  let pulseTime;
+  if (pulse.timestamp instanceof Date) {
+    pulseTime = pulse.timestamp.getTime();
+  } else if (typeof pulse.timestamp === 'string') {
+    pulseTime = new Date(pulse.timestamp).getTime();
+  } else if (typeof pulse.timestamp === 'number') {
+    pulseTime = pulse.timestamp;
+  } else {
+    return 10; // Fallback to base points
+  }
+  
+  const ageMs = Date.now() - pulseTime;
   const ageMinutes = Math.floor(ageMs / 60000);
-  const ageBonus = Math.min(ageMinutes, 60);
-  return 10 + ageBonus;
+  const ageBonus = Math.min(Math.max(ageMinutes, 0), 60); // Clamp between 0 and 60
+  const totalPoints = 10 + ageBonus;
+  
+  return totalPoints;
 }
 
 function getTargetWithMostPoints(attackerLat, attackerLon) {
@@ -676,157 +1024,70 @@ function generateAttackerCoordsDifferentCountry(targetCountry, maxAttempts = 20)
 
 // ============ Auto-Agent Beacon Generation & Attack System ============
 
-function generateAutoAgentPulse() {
-  console.log('\n🤖 ===== GENERATING AUTO-AGENT BEACON =====');
+async function generateAutoAgentAttackCycle() {
+  console.log('\n🤖 ===== AUTO-AGENT ATTACK CYCLE =====');
   
-  // Find country with most pulses
-  const countryPulseCounts = {};
-  const countryPulses = {};
+  // Generate truly random coordinates anywhere on Earth
+  // Lat: -60 to +70 (avoid polar regions where no countries exist)
+  // Lon: -180 to +180 (full range)
+  const agentLat = -60 + Math.random() * 130; // Range: -60 to +70
+  const agentLon = -180 + Math.random() * 360; // Range: -180 to +180
   
-  pulseData.pulseHistory.forEach(p => {
-    if (!destroyedTargets.has(getLocationKey(p.lat, p.lon))) {
-      const country = getCountryFromCoordinates(p.lat, p.lon);
-      countryPulseCounts[country] = (countryPulseCounts[country] || 0) + 1;
-      if (!countryPulses[country]) countryPulses[country] = [];
-      countryPulses[country].push(p);
-    }
-  });
+  console.log(`🌍 ⭐ CRITICAL: Random coordinates generated: lat=${agentLat.toFixed(4)}, lon=${agentLon.toFixed(4)}`);
   
-  if (Object.keys(countryPulseCounts).length === 0) {
-    console.log('   ℹ️ No countries with pulses - cannot generate agent');
-    return null;
-  }
+  // Use server-side reverse geocoding for accurate country detection
+  const geoData = await reverseGeocodeServer(agentLat, agentLon);
+  const actualAgentCountry = geoData.countryCode || geoData.countryName;
   
-  // Get country with most pulses
-  const targetCountry = Object.entries(countryPulseCounts)
-    .sort((a, b) => b[1] - a[1])[0][0];
+  console.log(`🎯 ⭐ CRITICAL: Agent location → ${geoData.countryName} (${geoData.countryCode || 'Water'})`);
+  if (geoData.city) console.log(`   📍 City: ${geoData.city}`);
+  if (geoData.state) console.log(`   🏛️ State: ${geoData.state}`);
   
-  console.log(`   Target country: ${targetCountry} with ${countryPulseCounts[targetCountry]} pulses`);
+  // Create pulse for agent with accurate country and full geo data
+  addPulse(agentLat, agentLon, 'auto', null, actualAgentCountry, geoData);
   
-  // Get country bounds
-  const countryBounds = {
-    'BG': { latMin: 41.2353, latMax: 44.2168, lonMin: 22.3571, lonMax: 28.5681 },
-    'RO': { latMin: 43.6884, latMax: 48.2208, lonMin: 20.2619, lonMax: 29.6279 },
-    'GR': { latMin: 34.8022, latMax: 41.7488, lonMin: 19.3731, lonMax: 28.2432 },
-    'TR': { latMin: 35.8081, latMax: 42.7939, lonMin: 26.0433, lonMax: 44.7939 },
-    'DE': { latMin: 47.2701, latMax: 55.0996, lonMin: 5.8663, lonMax: 15.0419 },
-    'FR': { latMin: 42.4314, latMax: 51.1242, lonMin: -5.1422, lonMax: 8.2275 },
-    'IT': { latMin: 36.6230, latMax: 47.0921, lonMin: 6.6272, lonMax: 18.5203 },
-    'ES': { latMin: 36.0021, latMax: 43.7483, lonMin: -9.2393, lonMax: 3.0910 },
-    'GB': { latMin: 50.0229, latMax: 58.6350, lonMin: -7.5721, lonMax: 1.7628 },
-    'US': { latMin: 24.5210, latMax: 49.3844, lonMin: -125.0011, lonMax: -66.9326 },
-    'CA': { latMin: 41.6765, latMax: 83.1096, lonMin: -141.0017, lonMax: -52.6480 },
-    'MX': { latMin: 14.5345, latMax: 32.7186, lonMin: -117.1205, lonMax: -86.8108 },
-    'BR': { latMin: -33.7683, latMax: 5.2419, lonMin: -73.9830, lonMax: -34.7725 },
-    'JP': { latMin: 30.3966, latMax: 45.5514, lonMin: 130.4017, lonMax: 145.8369 },
-    'CN': { latMin: 18.2671, latMax: 53.5604, lonMin: 73.5057, lonMax: 135.0865 },
-    'IN': { latMin: 8.0883, latMax: 35.5047, lonMin: 68.1766, lonMax: 97.4025 },
-    'AU': { latMin: -43.6345, latMax: -10.6718, lonMin: 112.9211, lonMax: 154.3021 },
-    'ZA': { latMin: -34.8212, latMax: -22.0529, lonMin: 16.3449, lonMax: 32.8305 },
-    'RU': { latMin: 41.1850, latMax: 81.8554, lonMin: 19.6389, lonMax: 169.6007 }
-  };
-  
-  const bounds = countryBounds[targetCountry];
-  if (!bounds) {
-    console.log(`   ❌ No bounds for country ${targetCountry}`);
-    return null;
-  }
-  
-  // Generate random location in country
-  const agentLat = bounds.latMin + Math.random() * (bounds.latMax - bounds.latMin);
-  const agentLon = bounds.lonMin + Math.random() * (bounds.lonMax - bounds.lonMin);
-  
-  console.log(`   Agent location: (${agentLat.toFixed(4)}, ${agentLon.toFixed(4)})`);
-  
-  // Create auto-agent pulse
-  addPulse(agentLat, agentLon, 'auto', null);
-  
-  console.log(`   ✅ Auto-agent beacon created in ${targetCountry}`);
-  
-  return {
-    lat: agentLat,
-    lon: agentLon,
-    country: targetCountry,
-    pulses: countryPulses[targetCountry]
-  };
-}
-
-function executeAutoAgentAttack(agentData) {
-  if (!agentData) return;
-  
-  console.log('\n⚔️ ===== AUTO-AGENT ATTACK EXECUTION =====');
-  console.log(`   Agent in ${agentData.country} at (${agentData.lat.toFixed(2)}, ${agentData.lon.toFixed(2)})`);
-  
-  // Calculate average points for country
-  const countryPulses = agentData.pulses;
-  const now = Date.now();
-  const pulsePoints = countryPulses.map(p => {
-    const ageMs = now - new Date(p.timestamp).getTime();
-    const ageMinutes = Math.floor(ageMs / 60000);
-    return 10 + Math.min(ageMinutes, 60);
-  });
-  
-  const avgPoints = pulsePoints.reduce((sum, p) => sum + p, 0) / pulsePoints.length;
-  console.log(`   Country average points: ${avgPoints.toFixed(1)}`);
-  
-  // Find targets below average
-  const validTargets = [];
-  countryPulses.forEach((p, idx) => {
+  // STEP 3: Find all active pulses NOT in agent's country
+  const activePulses = pulseData.pulseHistory.filter(p => {
     const key = getLocationKey(p.lat, p.lon);
-    const agentKey = getLocationKey(agentData.lat, agentData.lon);
-    
-    if (key !== agentKey && !destroyedTargets.has(key) && pulsePoints[idx] < avgPoints) {
-      validTargets.push({
-        pulse: p,
-        points: pulsePoints[idx],
-        key: key
-      });
-    }
+    // Use geoData country if available, otherwise fallback to stored country
+    const pCountry = (p.geoData && p.geoData.countryCode) 
+      ? p.geoData.countryCode 
+      : (p.country || 'Unknown');
+    return !destroyedTargets.has(key) && pCountry !== actualAgentCountry;
   });
   
-  console.log(`   Valid targets (below ${avgPoints.toFixed(1)} pts): ${validTargets.length}`);
+  console.log(`📍 Found ${activePulses.length} targets outside ${actualAgentCountry}`);
   
-  if (validTargets.length === 0) {
-    console.log('   ℹ️ No valid targets below average - picking any target in country');
-    // Pick any target if none below average
-    countryPulses.forEach((p, idx) => {
-      const key = getLocationKey(p.lat, p.lon);
-      const agentKey = getLocationKey(agentData.lat, agentData.lon);
-      
-      if (key !== agentKey && !destroyedTargets.has(key)) {
-        validTargets.push({
-          pulse: p,
-          points: pulsePoints[idx],
-          key: key
-        });
-      }
-    });
-  }
-  
-  if (validTargets.length === 0) {
-    console.log('   ❌ No valid targets at all - aborting attack');
+  if (activePulses.length === 0) {
+    console.log('⚠️ No targets in other countries - skipping attack');
     return;
   }
   
-  // Pick random target
-  const targetData = validTargets[Math.floor(Math.random() * validTargets.length)];
-  const target = targetData.pulse;
+  // STEP 4: Pick random target
+  const target = activePulses[Math.floor(Math.random() * activePulses.length)];
+  const targetCountry = (target.geoData && target.geoData.countryCode) 
+    ? target.geoData.countryCode 
+    : (target.country || 'Unknown');
   
-  console.log(`   Selected target: (${target.lat.toFixed(2)}, ${target.lon.toFixed(2)}) with ${targetData.points} pts`);
+  console.log(`⚔️ Attack: ${actualAgentCountry} → ${targetCountry} at (${target.lat.toFixed(2)}, ${target.lon.toFixed(2)})`);
   
-  // Broadcast attack event with full visualization
+  // STEP 5: Launch attack
+  const autoAttackType = getRandomAttackType();
+  const autoDuration = calculateAttackDurationSec(autoAttackType, agentLat, agentLon, target.lat, target.lon);
+
   const attackEvent = {
-    fromLat: agentData.lat,
-    fromLon: agentData.lon,
+    fromLat: agentLat,
+    fromLon: agentLon,
     toLat: target.lat,
     toLon: target.lon,
     isAutoAgent: true,
-    duration: 30,
+    attackType: autoAttackType,
+    duration: autoDuration,
     timestamp: new Date().toISOString(),
     startTime: Date.now()
   };
+  console.log(`   📤 Broadcasting AUTO attackEvent with attackType: ${autoAttackType}`);
   
-  // Track active attack
   activeAttacks.push(attackEvent);
   
   // Clean up old attacks
@@ -835,9 +1096,7 @@ function executeAutoAgentAttack(agentData) {
     activeAttacks.shift();
   }
   
-  console.log(`   ✅ Attack launched: ${agentData.country} → target`);
-  console.log(`   Connected clients: ${io.engine.clientsCount}`);
-  
+  console.log(`✅ Attack launched | Clients: ${io.engine.clientsCount}`);
   io.emit('attackEvent', attackEvent);
   
   // Destroy target after animation
@@ -847,52 +1106,35 @@ function executeAutoAgentAttack(agentData) {
       destroyedTargets.add(targetKey);
       removeLocation(targetKey, 'destroyed-by-auto');
       
-      const targetDefense = { shield: 0, armor: 0, interceptor: 0 };
-      const targetCountry = getCountryFromCoordinates(target.lat, target.lon);
-      
       io.emit('targetDestroyed', { 
-        locationKey: targetKey,
-        destroyedBySocket: null,
-        isAutoAgent: true,
-        targetName: targetCountry,
-        targetCountry: targetCountry,
-        timestamp: target.timestamp,
-        targetDefense: targetDefense
+        lat: target.lat, 
+        lon: target.lon,
+        id: `PULSE_${targetKey}`,
+        country: targetCountry
       });
       
-      console.log(`   💥 Target destroyed by auto-agent`);
+      console.log(`💥 Target destroyed at (${target.lat.toFixed(2)}, ${target.lon.toFixed(2)})`);
     }
-  }, 31000);
+  }, (autoDuration * 1000) + 1000);
   
-  console.log('===== ATTACK COMPLETE =====\n');
+  console.log('===== CYCLE COMPLETE =====\n');
 }
 
 // ============ Auto-Agent Attack Scheduler ============
-// Server decides when auto-agents should attack
 
-function scheduleAutoAgentAttack() {
-  // Auto-agents attack at random intervals
+async function scheduleAutoAgentAttack() {
   const attackInterval = 8000 + Math.random() * 7000; // 8-15 seconds
 
   console.log(`\n⏰ [AUTO-AGENT] Scheduling next attack in ${(attackInterval / 1000).toFixed(1)}s`);
   console.log(`   Active pulses: ${pulseData.pulseHistory.length}, Destroyed: ${destroyedTargets.size}`);
 
-  setTimeout(() => {
+  setTimeout(async () => {
     console.log(`\n🔥 ===== AUTO-AGENT CYCLE START =====`);
     console.log(`   Total pulses: ${pulseData.pulseHistory.length}`);
     console.log(`   Connected clients: ${io.engine.clientsCount}`);
     
-    // Generate new auto-agent beacon
-    const agentData = generateAutoAgentPulse();
-    
-    if (agentData) {
-      // Wait 2 seconds then execute attack
-      setTimeout(() => {
-        executeAutoAgentAttack(agentData);
-      }, 2000);
-    } else {
-      console.log('   ℹ️ Could not generate agent - rescheduling');
-    }
+    // Execute complete attack cycle (now async with geocoding)
+    await generateAutoAgentAttackCycle();
     
     console.log(`===== CYCLE COMPLETE =====\n`);
     // Schedule next attack
@@ -902,17 +1144,35 @@ function scheduleAutoAgentAttack() {
 
 // Initialize with seed pulses if empty
 function initializeWithSeedPulses() {
+  // Try to load existing game state first
+  const loaded = loadGameStateFromFile();
+  if (loaded && pulseData.pulseHistory.length > 0) {
+    console.log(`\n✅ Loaded existing game state with ${pulseData.pulseHistory.length} pulses`);
+    return;
+  }
+  
+  // Only create seed pulses if no saved data exists
   if (pulseData.pulseHistory.length === 0) {
     console.log('\n🌱 ===== INITIALIZING SEED PULSES =====');
     console.log('   No pulses found - creating initial beacons...');
     
-    const seedCountries = ['US', 'GB', 'DE', 'JP', 'BR'];
+    const seedCountries = ['US', 'GB', 'DE', 'JP', 'BR', 'AU', 'IN', 'CA', 'FR', 'ES', 'IT', 'RU', 'CN', 'MX', 'ZA'];
     const countryBounds = {
       'US': { latMin: 24.5210, latMax: 49.3844, lonMin: -125.0011, lonMax: -66.9326 },
       'GB': { latMin: 50.0229, latMax: 58.6350, lonMin: -7.5721, lonMax: 1.7628 },
       'DE': { latMin: 47.2701, latMax: 55.0996, lonMin: 5.8663, lonMax: 15.0419 },
       'JP': { latMin: 30.3966, latMax: 45.5514, lonMin: 130.4017, lonMax: 145.8369 },
-      'BR': { latMin: -33.7683, latMax: 5.2419, lonMin: -73.9830, lonMax: -34.7725 }
+      'BR': { latMin: -33.7683, latMax: 5.2419, lonMin: -73.9830, lonMax: -34.7725 },
+      'AU': { latMin: -43.6345, latMax: -10.6718, lonMin: 112.9211, lonMax: 154.3021 },
+      'IN': { latMin: 8.0883, latMax: 35.5047, lonMin: 68.1766, lonMax: 97.4025 },
+      'CA': { latMin: 41.6765, latMax: 83.1096, lonMin: -141.0017, lonMax: -52.6480 },
+      'FR': { latMin: 42.4314, latMax: 51.1242, lonMin: -5.1422, lonMax: 8.2275 },
+      'ES': { latMin: 36.0021, latMax: 43.7483, lonMin: -9.2393, lonMax: 3.0910 },
+      'IT': { latMin: 36.6230, latMax: 47.0921, lonMin: 6.6272, lonMax: 18.5203 },
+      'RU': { latMin: 41.1850, latMax: 81.8554, lonMin: 19.6389, lonMax: 169.6007 },
+      'CN': { latMin: 18.2671, latMax: 53.5604, lonMin: 73.5057, lonMax: 135.0865 },
+      'MX': { latMin: 14.5345, latMax: 32.7186, lonMin: -117.1205, lonMax: -86.8108 },
+      'ZA': { latMin: -34.8212, latMax: -22.0529, lonMin: 16.3449, lonMax: 32.8305 }
     };
     
     seedCountries.forEach(country => {
@@ -920,13 +1180,17 @@ function initializeWithSeedPulses() {
       if (bounds) {
         const lat = bounds.latMin + Math.random() * (bounds.latMax - bounds.latMin);
         const lon = bounds.lonMin + Math.random() * (bounds.lonMax - bounds.lonMin);
+        const detected = getCountryFromCoordinates(lat, lon);
         addPulse(lat, lon, 'seed', null);
-        console.log(`   ✅ Created seed pulse in ${country} at (${lat.toFixed(2)}, ${lon.toFixed(2)})`);
+        console.log(`   ✅ Seed: intended=${country}, detected=${detected.code} at (${lat.toFixed(4)}, ${lon.toFixed(4)})`);
       }
     });
     
     console.log(`   Total seed pulses created: ${pulseData.pulseHistory.length}`);
     console.log('===== INITIALIZATION COMPLETE =====\n');
+    
+    // Save initial seed state
+    saveGameStateToFile();
   }
 }
 
@@ -1008,16 +1272,27 @@ io.on('connection', (socket) => {
     console.log(`⚔️ Attack from (${data.fromLat.toFixed(2)}, ${data.fromLon.toFixed(2)}) [${attackerCountry}] to (${data.toLat.toFixed(2)}, ${data.toLon.toFixed(2)}) [${targetCountry}]`);
 
     // Broadcast attack event to all clients (for synchronized visualization)
+    const resolvedAttackType = ATTACK_TYPES[data.attackType] ? data.attackType : 'pulse';
+    const resolvedDuration = calculateAttackDurationSec(
+      resolvedAttackType,
+      data.fromLat,
+      data.fromLon,
+      data.toLat,
+      data.toLon
+    );
+
     const attackEvent = {
       fromLat: data.fromLat,
       fromLon: data.fromLon,
       toLat: data.toLat,
       toLon: data.toLon,
       isAutoAgent: false, // This is from human player
-      duration: data.duration || 8, // Use duration from client or default to 8
+      attackType: resolvedAttackType,
+      duration: resolvedDuration,
       timestamp: new Date().toISOString(),
       startTime: Date.now()
     };
+    console.log(`   📤 Broadcasting attackEvent with attackType: ${resolvedAttackType}`);
 
     // Track active attack
     activeAttacks.push(attackEvent);
@@ -1030,7 +1305,10 @@ io.on('connection', (socket) => {
 
     io.emit('attackEvent', attackEvent);
 
-    // Destroy target after animation duration
+    // Destroy target after animation duration (convert duration from seconds to milliseconds)
+    const destroyTimeoutMs = (attackEvent.duration * 1000) + 1000; // Add 1s buffer for animation to complete
+    console.log(`⏱️ Setting target destruction timeout: ${destroyTimeoutMs}ms (${attackEvent.duration}s duration + 1s buffer)`);
+    
     setTimeout(() => {
       const targetKey = getLocationKey(data.toLat, data.toLon);
       if (!destroyedTargets.has(targetKey)) {
@@ -1038,6 +1316,17 @@ io.on('connection', (socket) => {
         removeLocation(targetKey, 'destroyed-by-player');
         // Find target in pulse history to get its data
         const targetPulse = pulseData.pulseHistory.find(p => getLocationKey(p.lat, p.lon) === targetKey);
+        
+        // Calculate points earned for destroying this target
+        const pointsEarned = calculateTargetPoints(targetPulse);
+        
+        // Log detailed calculation info
+        if (targetPulse && targetPulse.timestamp) {
+          const pulseAge = Math.floor((Date.now() - new Date(targetPulse.timestamp).getTime()) / 60000);
+          console.log(`💰 Points calculation: base=10, age=${pulseAge}min, bonus=${Math.min(pulseAge, 60)}, total=${pointsEarned}`);
+        } else {
+          console.log(`💰 Points earned: ${pointsEarned} (no timestamp data)`);
+        }
         
         // Get target's defense info (if target was a player's location)
         // Try to find which socket owns this location by matching coordinates
@@ -1061,15 +1350,16 @@ io.on('connection', (socket) => {
           targetName: targetPulse?.country || 'Unknown',
           targetCountry: targetPulse?.country || 'Unknown',
           timestamp: targetPulse?.timestamp,
-          targetDefense: targetDefense
+          targetDefense: targetDefense,
+          pointsEarned: pointsEarned
         });
-        console.log(`💥 Target destroyed by player (defense: ${JSON.stringify(targetDefense)})`);
+        console.log(`💥 Target destroyed by player (defense: ${JSON.stringify(targetDefense)}, points: ${pointsEarned})`);
       }
 
       // Generate new pulse at attacker location (human player leaves their mark)
       console.log(`📍 Generating new pulse at attacker location (${data.fromLat.toFixed(2)}, ${data.fromLon.toFixed(2)})`);
       addPulse(data.fromLat, data.fromLon, 'client', socket.id);
-    }, 31000); // Wait for 30s attack animation to complete
+    }, destroyTimeoutMs);
   });
 
   // Handle target destruction (broadcast to all clients)
