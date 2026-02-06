@@ -1226,7 +1226,6 @@ io.on('connection', (socket) => {
     console.log(`   Attack: ${(a.duration - elapsed).toFixed(1)}s remaining`);
   });
   
-  // Send initial data with online player count
   socket.emit('initData', {
     global: pulseData.global,
     countries: pulseData.countries,
@@ -1234,15 +1233,8 @@ io.on('connection', (socket) => {
     pulseHistory: pulseData.pulseHistory,
     destroyedTargets: Array.from(destroyedTargets),
     topPlayers: getTopPlayers(10),
-    activeAttacks: activeAttacksList,
-    onlinePlayers: io.engine.clientsCount
+    activeAttacks: activeAttacksList
   });
-  // Broadcast updated online player count to all clients
-  function broadcastOnlinePlayers() {
-    io.emit('onlinePlayerCount', { onlinePlayers: io.engine.clientsCount });
-  }
-
-  broadcastOnlinePlayers();
 
   // Handle pulse event
   socket.on('pulse', (data) => {
@@ -1439,7 +1431,6 @@ io.on('connection', (socket) => {
     console.log(`Client disconnected: ${socket.id}`);
     // Clean up player defense data
     playerDefense.delete(socket.id);
-    broadcastOnlinePlayers();
   });
 
   // Handle get current data request

@@ -2118,7 +2118,11 @@ function updatePulseDisplay() {
     }
     
     pulseBtn.disabled = false;
-    pulseBtn.textContent = selectedTarget ? '⚔️ Attack Target' : '🎯 Select target';
+    if (battleModeEnabled) {
+        pulseBtn.textContent = selectedTarget ? '⚔️ Attack Target' : '🎯 Select target';
+    } else {
+        pulseBtn.textContent = '📡 Deploy Beacon';
+    }
 }
 
 // ============ Period Filters Setup ============
@@ -3139,17 +3143,9 @@ function setupSocketListeners() {
         // Update online player count in live stats widget
         const playerCountEl = document.getElementById('livePlayerCount');
         if (playerCountEl && data.onlinePlayers !== undefined) {
-            playerCountEl.textContent = data.onlinePlayers;
+            playerCountEl.textContent = data.onlinePlayers || '1+';
             playerCountEl.dataset.synced = 'true';
         }
-            // Listen for real-time online player count updates
-            socket.on('onlinePlayerCount', (data) => {
-                const playerCountEl = document.getElementById('livePlayerCount');
-                if (playerCountEl && data && typeof data.onlinePlayers === 'number') {
-                    playerCountEl.textContent = data.onlinePlayers;
-                    playerCountEl.dataset.synced = 'true';
-                }
-            });
         
         // Update live stats widget
         updateLiveStats();

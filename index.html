@@ -6,30 +6,6 @@
     <title>GlobalAttackMap - Real-Time Global Attack Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-                /* Tablet: place map under header, above control panel */
-                @media (max-width: 1024px) and (min-width: 769px) {
-                    .split-container {
-                        flex-direction: column !important;
-                    }
-                    .map-container {
-                        order: 1 !important;
-                        width: 100% !important;
-                        min-height: 320px !important;
-                        max-height: 60vh !important;
-                    }
-                    .command-center {
-                        order: 2 !important;
-                        width: 100% !important;
-                        border-right: none !important;
-                        border-bottom: 1px solid var(--border) !important;
-                    }
-                    }
-                    .ad-panel {
-                        width: 100% !important;
-                        order: 2 !important;
-                        border-right: none !important;
-                        border-bottom: 1px solid var(--border) !important;
-                    }
         * {
             margin: 0;
             padding: 0;
@@ -138,9 +114,7 @@
                 opacity: 0;
             }
             to {
-                  margin: 0;
-                  padding: 0;
-                  box-sizing: border-box;
+                transform: translateY(0);
                 opacity: 1;
             }
         }
@@ -672,13 +646,7 @@
                 padding: 1rem 2rem;
                 font-size: 1.1rem;
             }
-            }
-                .ad-panel {
-                    width: 100% !important;
-                    order: 1 !important;
-                    border-right: none !important;
-                    border-bottom: none !important;
-                }
+        }
 
         .pulse-btn-wrapper {
             position: relative;
@@ -2812,10 +2780,7 @@
                 </div>
             </div>
             <button id="loginBtn" class="icon-btn" style="display: flex; align-items: center; gap: 4px; padding: 6px 10px; font-size: 0.8rem; font-weight: 600; flex-shrink: 0;">👤 Login</button>
-            <button id="logoutBtn" class="icon-btn" title="Logout" style="display: none; padding: 6px 10px; font-size: 0.8rem; font-weight: 600; flex-shrink: 0; display: flex; align-items: center; justify-content: center; gap: 4px;">
-                <span style="font-size:1.2em;line-height:1;" aria-label="Logout">🚪</span>
-                <span class="logout-text"> Logout</span>
-            </button>
+            <button id="logoutBtn" class="icon-btn" title="Logout" style="display: none; padding: 6px 10px; font-size: 0.8rem; font-weight: 600; flex-shrink: 0;">🚪 Logout</button>
             
             <div class="status" style="flex-shrink: 0;">
                 <div class="status-dot"></div>
@@ -2833,7 +2798,7 @@
     <div class="split-container" style="position: fixed; top: 60px; left: 0; right: 0; bottom: 0; display: flex; flex-direction: row;">
         
         <!-- Command Center (LEFT 40% / TOP 50% mobile) -->
-        <div class="command-center" style="width: 340px; max-width: 100vw; background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; opacity: 1; transition: opacity 0.5s ease; z-index: 1200;">
+        <div class="command-center" style="width: 40%; background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; opacity: 1; transition: opacity 0.5s ease;">
             
             <!-- Command Tabs -->
             <div class="command-tabs" style="display: flex; background: var(--bg-tertiary); border-bottom: 1px solid var(--border); padding: 6px; gap: 4px;">
@@ -2844,7 +2809,7 @@
             </div>
             
             <!-- Command Content -->
-            <div class="command-content" style="flex: 1; overflow-y: auto; overflow-x: hidden; padding: 8px; display: flex; flex-direction: column; gap: 8px; min-width: 0; min-height: 0;">
+            <div class="command-content" style="flex: 1; overflow-y: auto; overflow-x: hidden; padding: 8px; display: flex; flex-direction: column; gap: 8px;">
                 
                 <!-- ATTACK TAB -->
                 <div class="tab-panel active" data-panel="attack">
@@ -3012,13 +2977,13 @@
                 </div>
 
                 <!-- STATS TAB -->
-                <div class="tab-panel" data-panel="stats" style="display: none; flex-direction: column; gap: 12px; overflow-y: auto; max-height: 100vh; min-width: 0; min-height: 0;">
+                <div class="tab-panel" data-panel="stats" style="display: none;">
                     <!-- Live Stats Grid -->
                     <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border);" data-tooltip="Live stats updated from the server in real time">
                         <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">📊 LIVE STATISTICS</div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                             <div style="background: rgba(59, 130, 246, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #3b82f6;">
-                                <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Targets</div>
+                                <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Beacons</div>
                                 <div style="color: #3b82f6; font-weight: 700; font-size: 1.5rem;" id="liveBeaconCount">0</div>
                             </div>
                             <div style="background: rgba(239, 68, 68, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #ef4444;">
@@ -3030,7 +2995,7 @@
                                 <div style="color: #22c55e; font-weight: 700; font-size: 1.5rem;" id="liveKillCount">0</div>
                             </div>
                             <div style="background: rgba(168, 85, 247, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #a855f7;">
-                                <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">People Online</div>
+                                <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Online</div>
                                 <div style="color: #a855f7; font-weight: 700; font-size: 1.5rem;" id="livePlayerCount">1</div>
                             </div>
                         </div>
@@ -3142,8 +3107,8 @@
                 <!-- HELP TAB -->
                 <div class="tab-panel" data-panel="help" style="display: none; flex-direction: column; gap: 12px; overflow-y: auto; padding: 8px;">
                     <div style="padding: 14px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #3b82f6;">
-                        <h3 style="margin: 0 0 8px 0; color: #3b82f6; font-size: 0.95rem;">1. 🎯 Deploy Targets</h3>
-                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.8rem;">Click "Deploy Target" to place your marker on the map. Each target becomes a battle target for other players.</p>
+                        <h3 style="margin: 0 0 8px 0; color: #3b82f6; font-size: 0.95rem;">1. 🎯 Deploy Beacons</h3>
+                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.8rem;">Click "Deploy Beacon" to place your marker on the map. Each beacon becomes a battle target for other players.</p>
                     </div>
 
                     <div style="padding: 14px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #0ea5e9;">
@@ -3163,7 +3128,7 @@
 
                     <div style="padding: 14px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #8b5cf6;">
                         <h3 style="margin: 0 0 8px 0; color: #8b5cf6; font-size: 0.95rem;">5. 🛡️ Build Defenses</h3>
-                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.8rem;">Upgrade Shield (extra HP), Armor (damage reduction), and Interceptors (block chance) to protect your targets.</p>
+                        <p style="margin: 0; color: var(--text-secondary); line-height: 1.6; font-size: 0.8rem;">Upgrade Shield (extra HP), Armor (damage reduction), and Interceptors (block chance) to protect your beacons.</p>
                     </div>
 
                     <div style="padding: 14px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #f59e0b;">
@@ -3246,7 +3211,7 @@
                         <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem;">
                             <div style="display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 6px; background: rgba(59, 130, 246, 0.05);">
                                 <div style="width: 16px; height: 16px; border-radius: 50%; background: #3b82f6; box-shadow: 0 0 12px #3b82f6; flex-shrink: 0;"></div>
-                                <span>Your Target</span>
+                                <span>Your Beacon</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 6px; background: rgba(139, 92, 246, 0.05);">
                                 <div style="width: 16px; height: 16px; border-radius: 50%; background: #8b5cf6; box-shadow: 0 0 12px #8b5cf6; flex-shrink: 0;"></div>
@@ -3278,7 +3243,7 @@
         </div>
 
         <!-- Ad Panel (REPLACES Command Center) -->
-        <div class="ad-panel" id="adPanel" style="display: none; width: 340px; max-width: 100vw; background: var(--bg-secondary); border-right: 1px solid var(--border); overflow-y: auto; opacity: 0; transition: opacity 0.5s ease;">
+        <div class="ad-panel" id="adPanel" style="display: none; width: 40%; background: var(--bg-secondary); border-right: 1px solid var(--border); overflow-y: auto; opacity: 0; transition: opacity 0.5s ease;">
             <div style="position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
                 <div id="adContent" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: auto;"></div>
             </div>
@@ -3288,9 +3253,9 @@
         <div class="map-container" style="flex: 1; position: relative; background: var(--bg-secondary);">
             <div id="map" style="width: 100%; height: 100%;"></div>
             
-            <!-- Deploy Target Button -->
-            <button id="pulseBtn" class="main-action-btn" data-tooltip="Select a target to attack" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 14px 28px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 999px; font-size: 1rem; font-weight: 700; cursor: pointer; box-shadow: var(--glow); z-index: 500; min-width: 200px; height: 48px; display: flex; align-items: center; justify-content: center;">
-                🎯 Select target
+            <!-- Deploy Beacon Button -->
+            <button id="pulseBtn" class="main-action-btn" data-tooltip="Place your beacon on the map - It becomes a target for others!" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 14px 28px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 999px; font-size: 1rem; font-weight: 700; cursor: pointer; box-shadow: var(--glow); z-index: 500; min-width: 200px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                🎯 Deploy Beacon
             </button>
 
             <!-- Battle Cooldown (hidden by default) -->
@@ -3438,8 +3403,8 @@
             
             <div style="display: flex; flex-direction: column; gap: 20px;">
                 <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #3b82f6;">
-                    <h3 style="margin: 0 0 8px 0; color: #3b82f6;">1. 🎯 Deploy Targets</h3>
-                    <p style="margin: 0; color: var(--text-secondary); line-height: 1.6;">Click "Deploy Target" to place your marker on the map. Each target becomes a target.</p>
+                    <h3 style="margin: 0 0 8px 0; color: #3b82f6;">1. 🎯 Deploy Beacons</h3>
+                    <p style="margin: 0; color: var(--text-secondary); line-height: 1.6;">Click "Deploy Beacon" to place your marker on the map. Each beacon becomes a target.</p>
                 </div>
 
                 <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #0ea5e9;">
@@ -3459,7 +3424,7 @@
 
                 <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid #8b5cf6;">
                     <h3 style="margin: 0 0 8px 0; color: #8b5cf6;">5. 🛡️ Build Defenses</h3>
-                    <p style="margin: 0; color: var(--text-secondary); line-height: 1.6;">Upgrade Shield (HP), Armor (damage reduction), and Interceptors (block chance) to protect your targets.</p>
+                    <p style="margin: 0; color: var(--text-secondary); line-height: 1.6;">Upgrade Shield (HP), Armor (damage reduction), and Interceptors (block chance) to protect your beacons.</p>
                 </div>
 
                 <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 12px;">
@@ -3527,7 +3492,7 @@
                         <li>Attack older targets for maximum points</li>
                         <li>Balance spending between attacks and defense</li>
                         <li>Use different attack ranges to find vulnerable targets</li>
-                        <li>Upgrade defenses early to protect your targets</li>
+                        <li>Upgrade defenses early to protect your beacons</li>
                         <li>Watch the battle feed for real-time action</li>
                     </ul>
                 </div>
@@ -3545,50 +3510,6 @@
     <script src="script.js"></script>
 
     <style>
-        /* Stats tab responsive and scroll fix */
-        .command-center {
-            width: 340px;
-            max-width: 100vw;
-            z-index: 1200;
-        }
-        @media (max-width: 900px) {
-            .split-container {
-                flex-direction: column !important;
-            }
-            .command-center {
-                width: 100% !important;
-                height: 50% !important;
-                border-right: none !important;
-                border-bottom: 1px solid var(--border) !important;
-            }
-            .map-container {
-                width: 100% !important;
-                height: 50% !important;
-            }
-        
-        }
-        .command-content {
-            overflow-y: auto !important;
-            min-width: 0;
-            min-height: 0;
-        }
-        .tab-panel[data-panel="stats"] {
-            overflow-y: auto !important;
-            max-height: 100vh;
-            min-width: 0;
-            min-height: 0;
-        }
-        @media (max-width: 900px) {
-            .tab-panel[data-panel="stats"] {
-                max-height: calc(100vh - 60px);
-            }
-        }
-        /* Always horizontal on mobile, no vertical split flicker */
-        @media (max-width: 900px) {
-            .split-container {
-                flex-direction: column !important;
-            }
-        }
         /* Ad Panel Styles */
         .ad-panel {
             display: flex;
@@ -3613,13 +3534,13 @@
             .split-container {
                 flex-direction: column !important;
             }
+            
             .map-container {
-                display: block !important;
-                order: 0 !important;
-                min-height: 220px !important;
-                max-height: 38dvh !important;
-                flex: 0 0 auto !important;
+                order: -1;
+                flex: 0 0 35dvh;
+                min-height: 240px;
             }
+            
             .command-center {
                 width: 100% !important;
                 flex: 1;
@@ -3628,7 +3549,6 @@
                 border-bottom: none !important;
                 overflow-y: auto !important;
                 overflow-x: hidden !important;
-                order: 1 !important;
             }
             
             .ad-panel {
@@ -3721,10 +3641,6 @@
                 padding: 4px 8px !important;
                 font-size: 0.7rem !important;
             }
-            /* Hide Logout text on mobile, show only icon */
-            #logoutBtn .logout-text {
-                display: none !important;
-            }
             
             .status {
                 padding: 3px 6px !important;
@@ -3737,14 +3653,7 @@
             }
             
             .header-time {
-                display: flex !important;
-                align-items: center !important;
-                min-width: 70px !important;
-                font-size: 0.85rem !important;
-                background: none !important;
-                padding: 0 4px !important;
-                margin: 0 !important;
-                order: 99 !important;
+                display: none !important;
             }
             
             #geoBtn {
