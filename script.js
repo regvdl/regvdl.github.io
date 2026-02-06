@@ -2118,11 +2118,7 @@ function updatePulseDisplay() {
     }
     
     pulseBtn.disabled = false;
-    if (battleModeEnabled) {
-        pulseBtn.textContent = selectedTarget ? '⚔️ Attack Target' : '🎯 Select target';
-    } else {
-        pulseBtn.textContent = '📡 Deploy Beacon';
-    }
+    pulseBtn.textContent = selectedTarget ? '⚔️ Attack Target' : '🎯 Select target';
 }
 
 // ============ Period Filters Setup ============
