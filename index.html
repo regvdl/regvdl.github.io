@@ -23,7 +23,13 @@
                         border-right: none !important;
                         border-bottom: 1px solid var(--border) !important;
                     }
-                }
+                    }
+                    .ad-panel {
+                        width: 100% !important;
+                        order: 2 !important;
+                        border-right: none !important;
+                        border-bottom: 1px solid var(--border) !important;
+                    }
         * {
             margin: 0;
             padding: 0;
@@ -666,7 +672,13 @@
                 padding: 1rem 2rem;
                 font-size: 1.1rem;
             }
-        }
+            }
+                .ad-panel {
+                    width: 100% !important;
+                    order: 1 !important;
+                    border-right: none !important;
+                    border-bottom: none !important;
+                }
 
         .pulse-btn-wrapper {
             position: relative;
@@ -3266,7 +3278,7 @@
         </div>
 
         <!-- Ad Panel (REPLACES Command Center) -->
-        <div class="ad-panel" id="adPanel" style="display: none; width: 40%; background: var(--bg-secondary); border-right: 1px solid var(--border); overflow-y: auto; opacity: 0; transition: opacity 0.5s ease;">
+        <div class="ad-panel" id="adPanel" style="display: none; width: 340px; max-width: 100vw; background: var(--bg-secondary); border-right: 1px solid var(--border); overflow-y: auto; opacity: 0; transition: opacity 0.5s ease;">
             <div style="position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
                 <div id="adContent" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: auto;"></div>
             </div>
