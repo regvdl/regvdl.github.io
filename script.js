@@ -26,13 +26,26 @@ function initTabSystem() {
 
 // ===== Command Center Tab System =====
 function initCommandCenter() {
+
     const commandTabs = document.querySelectorAll('.command-tab');
     const tabPanels = document.querySelectorAll('.tab-panel');
+    // On load, activate the Attack tab and its panel by default
+    const defaultTab = document.querySelector('.command-tab[data-tab="attack"]');
+    const defaultPanel = document.querySelector('.tab-panel[data-panel="attack"]');
+    if (defaultTab && defaultPanel) {
+        // Remove active from all tabs and panels first
+        commandTabs.forEach(t => t.classList.remove('active'));
+        tabPanels.forEach(p => p.classList.remove('active'));
+        defaultTab.classList.add('active');
+        defaultTab.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
+        defaultTab.style.color = 'white';
+        defaultTab.style.border = 'none';
+        defaultPanel.classList.add('active');
+    }
 
     commandTabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const targetPanel = tab.getAttribute('data-tab');
-            
             // Remove active from all tabs
             commandTabs.forEach(t => {
                 t.classList.remove('active');
@@ -40,22 +53,25 @@ function initCommandCenter() {
                 t.style.color = 'var(--text-secondary)';
                 t.style.border = '1px solid var(--border)';
             });
-            
-            // Hide all panels
+            // Hide all tab panels
             tabPanels.forEach(p => {
+                p.classList.remove('active');
                 p.style.display = 'none';
             });
-            
             // Activate clicked tab
             tab.classList.add('active');
             tab.style.background = 'linear-gradient(135deg, var(--primary), var(--primary-dark))';
             tab.style.color = 'white';
             tab.style.border = 'none';
-            
             // Show corresponding panel
             const panel = document.querySelector(`.tab-panel[data-panel="${targetPanel}"]`);
             if (panel) {
-                panel.style.display = 'flex';
+                panel.classList.add('active');
+                if (targetPanel === 'stats') {
+                    panel.style.display = 'flex';
+                } else {
+                    panel.style.display = 'block';
+                }
                 console.log(`✅ Switched to ${targetPanel} tab`);
             }
         });

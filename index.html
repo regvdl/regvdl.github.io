@@ -1,3 +1,4 @@
+        /* @media (max-width: 640px) { ... } премахнато, защото не трябва да се вижда като надпис */
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -432,11 +433,107 @@
         /* Desktop: 3-column layout */
         @media (min-width: 1300px) {
             .layout {
-                grid-template-columns: minmax(0, 1fr) minmax(300px, 0.35fr);
-                gap: 12px;
-                padding: 8px;
+                grid-template-columns: minmax(0, 1fr) 270px;
+                gap: 8px;
+                padding: 6px;
             }
 
+            .command-center {
+                width: 600px !important;
+                max-width: 100vw !important;
+                min-width: unset !important;
+                padding: 6px !important;
+            }
+            .command-tabs {
+                gap: 3px !important;
+                padding: 3px !important;
+            }
+            .command-content {
+                padding: 6px !important;
+                gap: 6px !important;
+            }
+            .tab-panel {
+                gap: 6px !important;
+            }
+            .tab-panel > div[style*="padding: 6px"],
+            .tab-panel > div[style*="padding: 8px"],
+            .tab-panel > div[style*="padding: 12px"],
+            .tab-panel > div[style*="padding: 14px"] {
+                padding: 6px !important;
+                gap: 3px !important;
+            }
+            /* Stats tab grids: switch to 2 columns */
+            /* Removed forced grid for stats tab blocks to allow vertical stacking */
+            /* Ensure stat fields wrap if needed */
+            .tab-panel[data-panel="stats"] > div[style*="padding: 3px;"] {
+                min-width: 0 !important;
+                white-space: normal !important;
+                word-break: break-word !important;
+            }
+            .command-tabs {
+                gap: 2px !important;
+                padding: 2px !important;
+            }
+            .command-content {
+                padding: 4px !important;
+                gap: 4px !important;
+            }
+            .tab-panel {
+                gap: 4px !important;
+            }
+            .tab-panel > div[style*="padding: 6px"],
+            .tab-panel > div[style*="padding: 8px"],
+            .tab-panel > div[style*="padding: 12px"],
+            .tab-panel > div[style*="padding: 14px"] {
+                padding: 4px !important;
+                gap: 2px !important;
+            }
+            /* Battle Stats grid: switch to 2 columns */
+            .tab-panel[data-panel="attack"] > div[style*="display: grid;"] {
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+                gap: 4px !important;
+                padding: 2px !important;
+                min-width: 0 !important;
+                overflow-x: auto !important;
+            }
+            /* ATTACK RANGE grid: switch to 1 column */
+            .tab-panel[data-panel="attack"] > div[style*="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;"] {
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+                gap: 6px !important;
+            }
+            /* Stats tab grids: switch to 1 column */
+            .tab-panel[data-panel="stats"] > div[style*="display: grid;"] {
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+                gap: 6px !important;
+                max-width: 100% !important;
+                overflow-x: hidden !important;
+            }
+                        /* Ensure all Stats tab blocks never overflow horizontally */
+                        .tab-panel[data-panel="stats"] > div {
+                            max-width: 100% !important;
+                            overflow-x: hidden !important;
+                            word-break: break-word !important;
+                            white-space: normal !important;
+                        }
+                        /* Ensure leaderboard containers scroll vertically and never overflow horizontally */
+                        .tab-panel[data-panel="stats"] #userLeaderboard,
+                        .tab-panel[data-panel="stats"] #countryLeaderboard {
+                            max-width: 100% !important;
+                            overflow-x: hidden !important;
+                            overflow-y: auto !important;
+                            word-break: break-word !important;
+                            white-space: normal !important;
+                        }
+                        /* Ensure leaderboard text always wraps */
+                        .tab-panel[data-panel="stats"] #userLeaderboard *,
+                        .tab-panel[data-panel="stats"] #countryLeaderboard * {
+                            word-break: break-word !important;
+                            white-space: normal !important;
+                            max-width: 100% !important;
+                        }
             .side-panel {
                 grid-column: 2;
                 display: flex;
@@ -446,12 +543,64 @@
         /* Tablet: 1 column + tabs */
         @media (max-width: 1299px) {
             .layout {
-                grid-template-columns: 1fr;
+                grid-template-columns: minmax(0, 1fr) 270px;
+                gap: 8px;
+                padding: 6px;
             }
 
-            .side-panel {
-                display: flex;
-                grid-column: 1;
+            .command-center {
+                width: 420px !important;
+                min-width: 320px !important;
+                max-width: 100vw !important;
+                padding: 6px !important;
+            }
+            .ad-panel {
+                width: 420px !important;
+                min-width: 320px !important;
+                max-width: 100vw !important;
+            }
+            }
+            .ad-panel {
+                width: 680px !important;
+                min-width: 320px !important;
+                max-width: 100vw !important;
+            }
+            }
+            .command-tabs {
+                gap: 3px !important;
+                padding: 3px !important;
+            }
+            .command-content {
+                padding: 6px !important;
+                gap: 6px !important;
+            }
+            .tab-panel {
+                gap: 6px !important;
+            }
+            .tab-panel > div[style*="padding: 6px"],
+            .tab-panel > div[style*="padding: 8px"],
+            .tab-panel > div[style*="padding: 12px"],
+            .tab-panel > div[style*="padding: 14px"] {
+                padding: 2px !important;
+                gap: 2px !important;
+            }
+            /* Stats tab grids: switch to 1 column for mobile */
+            /* Battle Stats: row 1 (4 stats) */
+            .tab-panel[data-panel="stats"] > div[style*="display: grid; grid-template-columns: repeat(4, 1fr);"] {
+                display: grid !important;
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 16px !important;
+            }
+            /* Battle Stats: row 2 (3 stats) */
+            .tab-panel[data-panel="stats"] > div[style*="display: grid; grid-template-columns: repeat(3, 1fr);"] {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 16px !important;
+            }
+            /* Ensure stat fields are wide enough for single-line text */
+            .tab-panel[data-panel="stats"] > div[style*="padding: 3px;"] {
+                min-width: 120px !important;
+                white-space: nowrap !important;
             }
         }
 
@@ -679,9 +828,13 @@
             z-index: 501;
         }
         
-        .pulse-cooldown[style*="display: flex"] {
-            display: flex !important;
-        }
+            .pulse-cooldown[style*="display: flex"] {
+                display: flex !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                position: absolute !important;
+                bottom: 10px !important;
+            }
 
         .cooldown-label {
             font-size: 0.65rem;
@@ -689,19 +842,19 @@
             color: #fff;
             letter-spacing: 0.5px;
             line-height: 1;
-            text-transform: uppercase;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-            white-space: nowrap;
-            max-width: 100%;
-        }
-
-        .pulse-cooldown .cooldown-time {
-            font-size: 1.5rem;
-            font-weight: 900;
-            color: #fff;
-            font-family: 'Courier New', monospace;
+                .main-action-btn, .pulse-cooldown {
+                    bottom: 10px !important;
+                    font-size: 0.9rem !important;
+                    padding: 10px 18px !important;
+                    min-width: 140px !important;
+                    height: 36px !important;
+                    left: 50% !important;
+                    transform: translateX(-50%) !important;
+                    position: absolute !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                }
             text-shadow: 0 2px 8px rgba(0,0,0,0.5);
             line-height: 1;
             margin: 0;
@@ -1298,58 +1451,57 @@
         }
 
         .tab-button {
-            padding: 6px 10px;
-            border-radius: 8px;
-            background: transparent;
-            border: 1px solid transparent;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s ease;
-            font-weight: 500;
-            flex-shrink: 0;
-        }
-
-        .tab-button:hover {
-            background: rgba(139, 92, 246, 0.1);
-            border-color: var(--primary);
-            color: var(--primary-light);
-        }
-
-        .tab-button.active {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border-color: var(--primary-light);
-        }
-
-        @media (max-width: 640px) {
-            .tab-button {
-                padding: 6px 10px;
-                font-size: 0.8rem;
-                min-height: 38px;
+            .layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: minmax(200px, 35dvh) minmax(0, 1fr);
+                gap: 6px;
             }
-        }
 
-        @media (max-width: 480px) {
-            .tab-button {
-                padding: 6px 8px;
-                font-size: 0.75rem;
-                min-height: 36px;
+            .command-center {
+                width: 100% !important;
+                min-width: unset !important;
+                max-width: unset !important;
+                padding: 8px !important;
             }
-        }
-
-        .tab-content-wrapper {
-            flex: 1;
-            display: flex;
-            min-height: 0;
-            overflow: hidden;
-            flex-direction: column;
-        }
-
-        .tab-content {
-            flex: 1;
-            overflow-y: auto;
+            .command-tabs {
+                gap: 4px !important;
+                padding: 4px !important;
+            }
+            .command-content {
+                padding: 8px !important;
+                gap: 8px !important;
+            }
+            .tab-panel {
+                gap: 8px !important;
+            }
+            .tab-panel > div[style*="padding: 6px"],
+            .tab-panel > div[style*="padding: 8px"],
+            .tab-panel > div[style*="padding: 12px"],
+            .tab-panel > div[style*="padding: 14px"] {
+                padding: 8px !important;
+                gap: 4px !important;
+            }
+            /* Stats tab grids: switch to 1 column for mobile */
+            .tab-panel[data-panel="stats"] > div[style*="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"] {
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+                gap: 8px !important;
+            }
+            .tab-panel[data-panel="stats"] > div[style*="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;"] {
+                display: grid !important;
+                .pulse-cooldown[style*="display: flex"] {
+                    display: flex !important;
+                }
+                white-space: normal !important;
+                max-width: 100vw !important;
+            }
+            /* Ensure leaderboard items fit and wrap */
+            .tab-panel[data-panel="stats"] p.loading,
+            .tab-panel[data-panel="stats"] > div[style*="display: flex; flex-direction: column; gap: 4px;"] {
+                word-break: break-word !important;
+                white-space: normal !important;
+                max-width: 100vw !important;
+            }
             padding: 8px;
             display: none;
             flex-direction: column;
@@ -2547,7 +2699,7 @@
         }
 
         .layout {
-            grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+            grid-template-columns: minmax(0, 1.2fr) minmax(60px, 0.8fr);
             gap: var(--space-2);
         }
 
@@ -2558,6 +2710,9 @@
         .side-panel {
             grid-template-rows: repeat(4, minmax(0, 1fr));
             gap: var(--space-2);
+            min-width: 60px;
+            max-width: 60px;
+            width: 60px;
         }
 
         .card {
@@ -2795,28 +2950,28 @@
     </header>
 
     <!-- Split Screen Container -->
-    <div class="split-container" style="position: fixed; top: 60px; left: 0; right: 0; bottom: 0; display: flex; flex-direction: row;">
+    <div class="split-container" style="position: fixed; top: 60px; left: 0; right: 0; bottom: 0; display: flex;">
         
         <!-- Command Center (LEFT 40% / TOP 50% mobile) -->
-        <div class="command-center" style="width: 40%; background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; opacity: 1; transition: opacity 0.5s ease;">
+        <div class="command-center" style="background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; opacity: 1; transition: opacity 0.5s ease; width: 270px; min-width: 270px; max-width: 270px;">
             
             <!-- Command Tabs -->
-            <div class="command-tabs" style="display: flex; background: var(--bg-tertiary); border-bottom: 1px solid var(--border); padding: 6px; gap: 4px;">
-                <button class="command-tab active" data-tab="attack" data-tooltip="Attack controls: choose target, type, range, and defenses" style="flex: 1; padding: 3px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">🎯 Attack</button>
-                <button class="command-tab" data-tab="stats" data-tooltip="Stats panel: live counts, leaderboards, and activity" style="flex: 1; padding: 3px; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">📊 Stats</button>
-                <button class="command-tab" data-tab="settings" data-tooltip="Settings: theme, sound, performance, and data reset" style="flex: 1; padding: 3px; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">⚙️ Settings</button>
-                <button class="command-tab" data-tab="help" data-tooltip="Help: tips, attack types, defense types, and map legend" style="flex: 1; padding: 3px; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">❓ Help</button>
+            <div class="command-tabs" style="display: flex; background: var(--bg-tertiary); border-bottom: 1px solid var(--border); padding: 1px; gap: 1px;">
+                            <button class="command-tab" data-tab="attack" data-tooltip="Attack controls: choose target, type, range, and defenses" style="flex: 1; padding: 0; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 4px; font-size: 0.78rem; font-weight: 600; cursor: pointer; min-width: 0; width: auto;">🎯 Attack</button>
+                            <button class="command-tab" data-tab="stats" data-tooltip="Stats panel: live counts, leaderboards, and activity" style="flex: 1; padding: 0; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 4px; font-size: 0.78rem; font-weight: 600; cursor: pointer; min-width: 0; width: auto;">📊 Stats</button>
+                            <button class="command-tab" data-tab="settings" data-tooltip="Settings: theme, sound, performance, and data reset" style="flex: 1; padding: 0; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 4px; font-size: 0.78rem; font-weight: 600; cursor: pointer; min-width: 0; width: auto;">⚙️ Settings</button>
+                            <button class="command-tab" data-tab="help" data-tooltip="Help: tips, attack types, defense types, and map legend" style="flex: 1; padding: 0; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 4px; font-size: 0.78rem; font-weight: 600; cursor: pointer; min-width: 0; width: auto;">❓ Help</button>
             </div>
             
             <!-- Command Content -->
-            <div class="command-content" style="flex: 1; overflow-y: auto; overflow-x: hidden; padding: 8px; display: flex; flex-direction: column; gap: 8px;">
+            <div class="command-content" style="flex: 1; overflow-y: auto; overflow-x: hidden; padding: 1px; display: flex; flex-direction: column; gap: 2px;">
                 
                 <!-- ATTACK TAB -->
-                <div class="tab-panel active" data-panel="attack">
+                <div class="tab-panel" data-panel="attack">
                     <!-- Target Info Display -->
-                    <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 6px; border: 1px solid var(--border);" data-tooltip="Selected target details: location, age, points, distance, type, defenses">
+                        <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 1px; border: 1px solid var(--border);" data-tooltip="Selected target details: location, age, points, distance, type, defenses">
                         <div style="font-weight: 600; font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">🎯 TARGET</div>
-                        <div id="commandTargetInfo" style="padding: 8px; background: var(--bg-secondary); border-radius: 6px; border: 1px solid var(--border);">
+                            <div id="commandTargetInfo" style="padding: 1px; background: var(--bg-secondary); border-radius: 6px; border: 1px solid var(--border);">
                             <div id="battleTargetNameCompact" style="font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px;">No target selected</div>
                             <div id="targetInfoCountry" style="font-size: 0.65rem; color: var(--text-tertiary); margin-bottom: 6px; line-height: 1.3;">Click map to select</div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.65rem; margin-bottom: 6px;">
@@ -2844,10 +2999,10 @@
                     </div>
 
                     <!-- Attack Type Buttons -->
-                    <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 6px; border: 1px solid var(--border);" data-tooltip="Choose a rocket type: Scout (free), Arrow (10 pts), Titan (25 pts)">
+                        <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 1px; border: 1px solid var(--border);" data-tooltip="Choose a rocket type: Scout (free), Arrow (10 pts), Titan (25 pts)">
                         <div style="font-weight: 600; font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">⚡ ATTACK TYPE</div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;">
-                            <button class="battle-attack-btn active" data-type="pulse" data-tooltip="Scout (free)" style="padding: 4px 3px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.7rem; line-height: 1.2;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px;">
+                            <button class="battle-attack-btn active" data-type="pulse" data-tooltip="Scout (free)" style="padding: 0; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.65rem; line-height: 1.1; min-width: 0; width: auto;">
                                 <svg width="15.4" height="15.4" viewBox="-166.4 -166.4 844.8 844.8" xmlns="http://www.w3.org/2000/svg" style="display:block; margin: 0 auto 2px auto;" aria-hidden="true">
                                     <g transform="translate(256, 256) translate(120, 0) matrix(-1, 0, 0, 1, 0, 0) rotate(45) scale(1.35) translate(-256, -256)">
                                         <path fill="currentColor" stroke="currentColor" stroke-width="0.00512" d="M511.317,0.683c-43.328-3.938-75.594,9.047-112.063,45.516l66.547,66.547 C502.286,76.261,515.255,44.026,511.317,0.683z"></path>
@@ -2856,7 +3011,8 @@
                                 </svg>
                                 Scout<br><span style="font-size: 0.6rem; opacity: 0.8;">FREE</span>
                             </button>
-                            <button class="battle-attack-btn" data-type="laser" data-tooltip="Arrow (10 pts)" style="padding: 4px 3px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.7rem; line-height: 1.2;">
+                            <button class="battle-attack-btn" data-type="laser" data-tooltip="Arrow (10 pts)" style="padding: 0; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.7rem; line-height: 1.2; min-width: 0; width: auto;">
+                            <!-- Only one laser button should exist -->
                                 <svg width="17.7" height="17.7" viewBox="-166.4 -166.4 844.8 844.8" xmlns="http://www.w3.org/2000/svg" style="display:block; margin: 0 auto 2px auto;" aria-hidden="true">
                                     <g transform="translate(256, 256) translate(120, 0) matrix(-1, 0, 0, 1, 0, 0) rotate(45) scale(1.35) translate(-256, -256)">
                                         <path fill="currentColor" stroke="currentColor" stroke-width="0.00512" d="M511.317,0.683c-43.328-3.938-75.594,9.047-112.063,45.516l66.547,66.547 C502.286,76.261,515.255,44.026,511.317,0.683z"></path>
@@ -2865,7 +3021,8 @@
                                 </svg>
                                 Arrow<br><span style="font-size: 0.6rem; opacity: 0.8;">10 pts</span>
                             </button>
-                            <button class="battle-attack-btn" data-type="emp" data-tooltip="Titan (25 pts)" style="padding: 4px 3px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.7rem; line-height: 1.2;">
+                            <button class="battle-attack-btn" data-type="emp" data-tooltip="Titan (25 pts)" style="padding: 0; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.7rem; line-height: 1.2; min-width: 0; width: auto;">
+                            <!-- Only one emp button should exist -->
                                 <svg width="20" height="20" viewBox="-166.4 -166.4 844.8 844.8" xmlns="http://www.w3.org/2000/svg" style="display:block; margin: 0 auto 2px auto;" aria-hidden="true">
                                     <g transform="translate(256, 256) translate(120, 0) matrix(-1, 0, 0, 1, 0, 0) rotate(45) scale(1.35) translate(-256, -256)">
                                         <path fill="currentColor" stroke="currentColor" stroke-width="0.00512" d="M511.317,0.683c-43.328-3.938-75.594,9.047-112.063,45.516l66.547,66.547 C502.286,76.261,515.255,44.026,511.317,0.683z"></path>
@@ -2878,19 +3035,22 @@
                     </div>
 
                     <!-- Range Buttons -->
-                    <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 6px; border: 1px solid var(--border);" data-tooltip="Set attack range: shorter range is safer, global reaches anywhere">
+                        <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 1px; border: 1px solid var(--border);" data-tooltip="Set attack range: shorter range is safer, global reaches anywhere">
                         <div style="font-weight: 600; font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">📍 ATTACK RANGE</div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                            <button class="range-btn active" data-range="500" data-tooltip="Attack targets within 500km" style="padding: 3px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border: 2px solid var(--primary); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.7rem; color: white;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px;">
+                            <button class="range-btn active" data-range="500" data-tooltip="Attack targets within 500km" style="padding: 0; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border: 2px solid var(--primary); border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.62rem; color: white; min-width: 0; width: auto;">
                                 🔵 500km
                             </button>
-                            <button class="range-btn" data-range="1000" data-tooltip="Attack targets within 1000km" style="padding: 3px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.7rem; color: var(--text-secondary);">
+                            <button class="range-btn" data-range="1000" data-tooltip="Attack targets within 1000km" style="padding: 0; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.7rem; color: var(--text-secondary); min-width: 0; width: auto;">
+                            <!-- Only one 1000km button should exist -->
                                 🟡 1000km
                             </button>
-                            <button class="range-btn" data-range="4000" data-tooltip="Attack targets within 4000km" style="padding: 3px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.7rem; color: var(--text-secondary);">
+                            <button class="range-btn" data-range="4000" data-tooltip="Attack targets within 4000km" style="padding: 0; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.7rem; color: var(--text-secondary); min-width: 0; width: auto;">
+                            <!-- Only one 4000km button should exist -->
                                 🔴 4000km
                             </button>
-                            <button class="range-btn" data-range="global" data-tooltip="Attack targets anywhere" style="padding: 3px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.7rem; color: var(--text-secondary);">
+                            <button class="range-btn" data-range="global" data-tooltip="Attack targets anywhere" style="padding: 0; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.7rem; color: var(--text-secondary); min-width: 0; width: auto;">
+                            <!-- Only one global button should exist -->
                                 🌍 Global
                             </button>
                         </div>
@@ -2898,69 +3058,60 @@
                     </div>
 
                     <!-- Defense Upgrades -->
-                    <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 6px; border: 1px solid var(--border);" data-tooltip="Upgrade defenses: Shield, Armor, and Interceptor levels">
+                        <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 1px; border: 1px solid var(--border);" data-tooltip="Upgrade defenses: Shield, Armor, and Interceptor levels">
                         <div style="font-weight: 600; font-size: 0.8rem; margin-bottom: 6px; color: var(--text-secondary);">🔧 DEFENSE UPGRADES</div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;">
-                            <button class="defense-upgrade-btn" data-upgrade="shield" data-tooltip="Upgrade shield HP" style="padding: 4px 2px; background: rgba(59, 130, 246, 0.1); border: 2px solid var(--border); border-radius: 6px; cursor: pointer; color: #3b82f6; font-weight: bold; font-size: 0.65rem; line-height: 1.2;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px;">
+                            <button class="defense-upgrade-btn" data-upgrade="shield" data-tooltip="Upgrade shield HP" style="padding: 0; background: rgba(59, 130, 246, 0.1); border: 2px solid var(--border); border-radius: 4px; cursor: pointer; color: #3b82f6; font-weight: bold; font-size: 0.6rem; line-height: 1.1; min-width: 0; width: auto;">
                                 🛡️ Shield<br><span style="font-size: 0.55rem;">Lvl <span id="shieldLevel">0</span></span>
                             </button>
-                            <button class="defense-upgrade-btn" data-upgrade="armor" data-tooltip="Upgrade armor damage reduction" style="padding: 4px 2px; background: rgba(168, 85, 247, 0.1); border: 2px solid var(--border); border-radius: 6px; cursor: pointer; color: #a855f7; font-weight: bold; font-size: 0.65rem; line-height: 1.2;">
+                            <button class="defense-upgrade-btn" data-upgrade="armor" data-tooltip="Upgrade armor damage reduction" style="padding: 0; background: rgba(168, 85, 247, 0.1); border: 2px solid var(--border); border-radius: 4px; cursor: pointer; color: #a855f7; font-weight: bold; font-size: 0.65rem; line-height: 1.2; min-width: 0; width: auto;">
+                            <!-- Only one armor button should exist -->
                                 🔒 Armor<br><span style="font-size: 0.55rem;">Lvl <span id="armorLevel">0</span></span>
                             </button>
-                            <button class="defense-upgrade-btn" data-upgrade="interceptor" data-tooltip="Upgrade intercept chance" style="padding: 4px 2px; background: rgba(6, 182, 212, 0.1); border: 2px solid var(--border); border-radius: 6px; cursor: pointer; color: #06b6d4; font-weight: bold; font-size: 0.65rem; line-height: 1.2;">
+                            <button class="defense-upgrade-btn" data-upgrade="interceptor" data-tooltip="Upgrade intercept chance" style="padding: 0; background: rgba(6, 182, 212, 0.1); border: 2px solid var(--border); border-radius: 4px; cursor: pointer; color: #06b6d4; font-weight: bold; font-size: 0.65rem; line-height: 1.2; min-width: 0; width: auto;">
+                            <!-- Only one interceptor button should exist -->
                                 🚀 Intercept<br><span style="font-size: 0.55rem;">Lvl <span id="interceptorLevel">0</span></span>
                             </button>
                         </div>
                     </div>
 
                     <!-- Battle Stats Grid -->
-                    <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 8px; border: 1px solid var(--border);">
+                        <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 1px; border: 1px solid var(--border);">
                         <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 12px; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
                             <span>📊</span>
-                            <span data-tooltip="Core battle metrics from your current session">Battle Stats</span>
+                            <span data-tooltip="Core battle metrics from your current session" style="font-size: 0.82em;">Battle Stats</span>
                         </div>
                         
-                        <!-- Main Stats Row 1 -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                            <!-- Session Time -->
-                            <div style="padding: 3px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(59, 130, 246, 0.1)); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3); text-align: center;" data-tooltip="How long you've been playing in this session">
-                                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">⏱️ Session</div>
-                                <div id="sessionTime" style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">0m</div>
-                            </div>
-                            <!-- Kills -->
-                            <div style="padding: 3px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1)); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3); text-align: center;" data-tooltip="Total enemies destroyed in this session">
-                                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">💀 Kills</div>
-                                <div id="killCount" style="font-weight: 700; font-size: 0.95rem; color: #ef4444;">0</div>
-                            </div>
-                            <!-- Damage Per Kill -->
-                            <div style="padding: 3px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1)); border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.3); text-align: center;" data-tooltip="Average damage dealt per enemy killed">
-                                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">💥 Avg DMG</div>
-                                <div id="avgDamage" style="font-weight: 700; font-size: 0.95rem; color: #f59e0b;">0</div>
-                            </div>
-                            <!-- Accuracy -->
-                            <div style="padding: 3px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.1)); border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3); text-align: center;" data-tooltip="Successful hits out of all attacks launched">
-                                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">🎯 Accuracy</div>
-                                <div id="battAccuracy" style="font-weight: 700; font-size: 0.95rem; color: #22c55e;">0%</div>
-                            </div>
+                        <!-- Main Stats Row 1 as buttons -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 6px; margin-bottom: 4px;">
+                            <button type="button" style="padding: 8px 0; background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(220,38,38,0.1)); border-radius: 8px; border: 1px solid rgba(239,68,68,0.3); text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7rem; font-family: inherit; font-weight: 600; cursor: default; min-width: 0; width: 100%;">
+                                <span style="display: flex; align-items: center; gap: 4px; font-size: 1.1rem; color: var(--text-tertiary);"><span>💀</span><span style="font-size: 0.7rem; text-transform: uppercase;">Kills</span></span>
+                                <span id="killCount" style="font-weight: 700; font-size: 1.1rem; color: #ef4444; margin-top: 2px;">0</span>
+                            </button>
+                            <button type="button" style="padding: 8px 0; background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(217,119,6,0.1)); border-radius: 8px; border: 1px solid rgba(245,158,11,0.3); text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7rem; font-family: inherit; font-weight: 600; cursor: default; min-width: 0; width: 100%;">
+                                <span style="display: flex; align-items: center; gap: 4px; font-size: 1.1rem; color: var(--text-tertiary);"><span>💥</span><span style="font-size: 0.7rem; text-transform: uppercase;">Avg DMG</span></span>
+                                <span id="avgDamage" style="font-weight: 700; font-size: 1.1rem; color: #f59e0b; margin-top: 2px;">0</span>
+                            </button>
+                            <button type="button" style="padding: 8px 0; background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(22,163,74,0.1)); border-radius: 8px; border: 1px solid rgba(34,197,94,0.3); text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7rem; font-family: inherit; font-weight: 600; cursor: default; min-width: 0; width: 100%;">
+                                <span style="display: flex; align-items: center; gap: 4px; font-size: 1.1rem; color: var(--text-tertiary);"><span>🎯</span><span style="font-size: 0.7rem; text-transform: uppercase;">Accuracy</span></span>
+                                <span id="battAccuracy" style="font-weight: 700; font-size: 1.1rem; color: #22c55e; margin-top: 2px;">0%</span>
+                            </button>
                         </div>
                         
-                        <!-- Secondary Stats Row 2 -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                            <!-- Attacks Sent -->
-                            <div style="padding: 3px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(59, 130, 246, 0.1)); border-radius: 8px; border: 1px solid rgba(99, 102, 241, 0.3); text-align: center;" data-tooltip="Total attacks launched in this session (hits + misses)">
-                                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">⚡ Attacks</div>
-                                <div id="attacksSent" style="font-weight: 700; font-size: 0.95rem; color: #6366f1;">0</div>
-                            </div>
-                            <!-- Score -->
-                            <div style="padding: 3px; background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(139, 92, 246, 0.1)); border-radius: 8px; border: 1px solid rgba(168, 85, 247, 0.3); text-align: center;" data-tooltip="Current points available to spend on attacks and upgrades">
-                                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">⭐ Score</div>
-                                <div id="personalScore" style="font-weight: 700; font-size: 0.95rem; color: var(--primary);">0</div>
-                            </div>
-                            <!-- Points Spent -->
-                            <div style="padding: 3px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1)); border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.3); text-align: center;" data-tooltip="Total points spent on attacks in this session">
-                                <div style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">💸 Spent</div>
-                                <div id="pointsSpent" style="font-weight: 700; font-size: 0.95rem; color: #ef4444;">0</div>
-                            </div>
+                        <!-- Secondary Stats Row 2 as buttons -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 6px;">
+                            <button type="button" style="padding: 8px 0; background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(59,130,246,0.1)); border-radius: 8px; border: 1px solid rgba(99,102,241,0.3); text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7rem; font-family: inherit; font-weight: 600; cursor: default; min-width: 0; width: 100%;">
+                                <span style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; text-transform: uppercase;">⚡ Attacks</span>
+                                <span id="attacksSent" style="font-weight: 700; font-size: 0.95rem; color: #6366f1;">0</span>
+                            </button>
+                            <button type="button" style="padding: 8px 0; background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(139,92,246,0.1)); border-radius: 8px; border: 1px solid rgba(168,85,247,0.3); text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7rem; font-family: inherit; font-weight: 600; cursor: default; min-width: 0; width: 100%;">
+                                <span style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; text-transform: uppercase;">⭐ Score</span>
+                                <span id="personalScore" style="font-weight: 700; font-size: 0.95rem; color: var(--primary);">0</span>
+                            </button>
+                            <button type="button" style="padding: 8px 0; background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(220,38,38,0.1)); border-radius: 8px; border: 1px solid rgba(239,68,68,0.3); text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7rem; font-family: inherit; font-weight: 600; cursor: default; min-width: 0; width: 100%;">
+                                <span style="font-size: 0.7rem; color: var(--text-tertiary); margin-bottom: 4px; text-transform: uppercase;">💸 Spent</span>
+                                <span id="pointsSpent" style="font-weight: 700; font-size: 0.95rem; color: #ef4444;">0</span>
+                            </button>
                         </div>
                         
                         <div id="battleInterceptCount" style="display: none;"></div>
@@ -2968,7 +3119,7 @@
                     </div>
 
                     <!-- Battle Feed -->
-                    <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 6px; border: 1px solid var(--border); flex: 1; min-height: 120px; display: flex; flex-direction: column;" data-tooltip="Battle feed: recent attacks, kills, and notifications">
+                    <div style="background: var(--bg-tertiary); border-radius: 8px; padding: 1px; border: 1px solid var(--border); flex: 1; min-height: 120px; display: flex; flex-direction: column;" data-tooltip="Battle feed: recent attacks, kills, and notifications">
                         <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">📣 BATTLE FEED</div>
                         <div id="battleFeed" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 4px;">
                             <div style="color: var(--text-tertiary); text-align: center; padding: 20px; font-size: 0.75rem;">No recent activity</div>
@@ -2978,69 +3129,69 @@
 
                 <!-- STATS TAB -->
                 <div class="tab-panel" data-panel="stats" style="display: none;">
-                    <!-- Live Stats Grid -->
-                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border);" data-tooltip="Live stats updated from the server in real time">
-                        <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">📊 LIVE STATISTICS</div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                            <div style="background: rgba(59, 130, 246, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #3b82f6;">
-                                <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Beacons</div>
-                                <div style="color: #3b82f6; font-weight: 700; font-size: 1.5rem;" id="liveBeaconCount">0</div>
-                            </div>
-                            <div style="background: rgba(239, 68, 68, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #ef4444;">
-                                <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Attacks</div>
-                                <div style="color: #ef4444; font-weight: 700; font-size: 1.5rem;" id="liveAttackCount">0</div>
-                            </div>
-                            <div style="background: rgba(34, 197, 94, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #22c55e;">
-                                <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Kills</div>
-                                <div style="color: #22c55e; font-weight: 700; font-size: 1.5rem;" id="liveKillCount">0</div>
-                            </div>
-                            <div style="background: rgba(168, 85, 247, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #a855f7;">
-                                <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Online</div>
-                                <div style="color: #a855f7; font-weight: 700; font-size: 1.5rem;" id="livePlayerCount">1</div>
+                    <div class="stats-sections-wrapper" style="display: flex; flex-direction: column; gap: 12px;">
+                        <!-- Live Stats Grid -->
+                        <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border);" data-tooltip="Live stats updated from the server in real time">
+                            <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">📊 LIVE STATISTICS</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div style="background: rgba(59, 130, 246, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                                    <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Targets</div>
+                                    <div style="color: #3b82f6; font-weight: 700; font-size: 1.5rem;" id="liveBeaconCount">0</div>
+                                </div>
+                                <div style="background: rgba(239, 68, 68, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #ef4444;">
+                                    <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Attacks</div>
+                                    <div style="color: #ef4444; font-weight: 700; font-size: 1.5rem;" id="liveAttackCount">0</div>
+                                </div>
+                                <div style="background: rgba(34, 197, 94, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #22c55e;">
+                                    <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Kills</div>
+                                    <div style="color: #22c55e; font-weight: 700; font-size: 1.5rem;" id="liveKillCount">0</div>
+                                </div>
+                                <div style="background: rgba(168, 85, 247, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #a855f7;">
+                                    <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">People Online</div>
+                                    <div style="color: #a855f7; font-weight: 700; font-size: 1.5rem;" id="livePlayerCount">1</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Session Performance Stats -->
-                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border);" data-tooltip="Your performance metrics this session">
-                        <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">🎯 SESSION PERFORMANCE</div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                            <div style="background: rgba(99, 102, 241, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #6366f1;">
-                                <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Accuracy</div>
-                                <div style="color: #6366f1; font-weight: 700; font-size: 1.5rem;" id="statAccuracy">0%</div>
-                            </div>
-                            <div style="background: rgba(245, 158, 11, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #f59e0b;">
-                                <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Avg Damage</div>
-                                <div style="color: #f59e0b; font-weight: 700; font-size: 1.5rem;" id="statAvgDamage">0</div>
-                            </div>
-                            <div style="background: rgba(34, 197, 94, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #22c55e;">
-                                <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Kill/Death</div>
-                                <div style="color: #22c55e; font-weight: 700; font-size: 1.5rem;" id="statKD">0.0</div>
-                            </div>
-                            <div style="background: rgba(168, 85, 247, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #a855f7;">
-                                <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Points Earned</div>
-                                <div style="color: #a855f7; font-weight: 700; font-size: 1.5rem;" id="statPointsEarned">0</div>
+                        <!-- Session Performance Stats -->
+                        <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border);" data-tooltip="Your performance metrics this session">
+                            <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">🎯 SESSION PERFORMANCE</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div style="background: rgba(99, 102, 241, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #6366f1;">
+                                    <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Accuracy</div>
+                                    <div style="color: #6366f1; font-weight: 700; font-size: 1.5rem;" id="statAccuracy">0%</div>
+                                </div>
+                                <div style="background: rgba(245, 158, 11, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                                    <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Avg Damage</div>
+                                    <div style="color: #f59e0b; font-weight: 700; font-size: 1.5rem;" id="statAvgDamage">0</div>
+                                </div>
+                                <div style="background: rgba(34, 197, 94, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #22c55e;">
+                                    <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Kill/Death</div>
+                                    <div style="color: #22c55e; font-weight: 700; font-size: 1.5rem;" id="statKD">0.0</div>
+                                </div>
+                                <div style="background: rgba(168, 85, 247, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #a855f7;">
+                                    <div style="color: var(--text-tertiary); font-size: 0.65rem; margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Points Earned</div>
+                                    <div style="color: #a855f7; font-weight: 700; font-size: 1.5rem;" id="statPointsEarned">0</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Player Leaderboard -->
-                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border); flex: 1; min-height: 200px; display: flex; flex-direction: column;" data-tooltip="Top players leaderboard (live updates)">
-                        <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">👑 TOP PLAYERS</div>
-                        <div id="userLeaderboard" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;">
-                            <p class="loading" style="text-align: center; color: var(--text-tertiary); padding: 20px; font-size: 0.75rem;">Loading players...</p>
+                        <!-- Player Leaderboard -->
+                        <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border); flex: 1; min-height: 200px; display: flex; flex-direction: column;" data-tooltip="Top players leaderboard (live updates)">
+                            <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">👑 TOP PLAYERS</div>
+                            <div id="userLeaderboard" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;">
+                                <p class="loading" style="text-align: center; color: var(--text-tertiary); padding: 20px; font-size: 0.75rem;">Loading players...</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Country Leaderboard -->
-                    <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border); flex: 1; min-height: 200px; display: flex; flex-direction: column;" data-tooltip="Top countries leaderboard (live updates)">
-                        <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">🏆 COUNTRY LEADERBOARD</div>
-                        <div id="countryLeaderboard" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;">
-                            <p class="loading" style="text-align: center; color: var(--text-tertiary); padding: 20px; font-size: 0.75rem;">Collecting data...</p>
+                        <!-- Country Leaderboard -->
+                        <div style="background: var(--bg-tertiary); border-radius: 12px; padding: 12px; border: 1px solid var(--border); flex: 1; min-height: 200px; display: flex; flex-direction: column;" data-tooltip="Top countries leaderboard (live updates)">
+                            <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-secondary);">🏆 COUNTRY LEADERBOARD</div>
+                            <div id="countryLeaderboard" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;">
+                                <p class="loading" style="text-align: center; color: var(--text-tertiary); padding: 20px; font-size: 0.75rem;">Collecting data...</p>
+                            </div>
                         </div>
-                    </div>
-                    <div id="recentActivityEl" style="display: none;"></div>
-                    <div id="topCountriesEl" style="display: none;"></div>
+                    </div> <!-- end .stats-sections-wrapper -->
                 </div>
 
                 <!-- SETTINGS TAB -->
@@ -3243,7 +3394,7 @@
         </div>
 
         <!-- Ad Panel (REPLACES Command Center) -->
-        <div class="ad-panel" id="adPanel" style="display: none; width: 40%; background: var(--bg-secondary); border-right: 1px solid var(--border); overflow-y: auto; opacity: 0; transition: opacity 0.5s ease;">
+        <div class="ad-panel" id="adPanel" style="display: none; background: var(--bg-secondary); border-right: 1px solid var(--border); overflow-y: auto; opacity: 0; transition: opacity 0.5s ease;">
             <div style="position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
                 <div id="adContent" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: auto;"></div>
             </div>
@@ -3517,6 +3668,8 @@
             align-items: center;
             justify-content: center;
             overflow-y: auto;
+            width: 600px;
+            max-width: 100vw;
         }
 
         .command-center button {
@@ -3541,21 +3694,17 @@
                 min-height: 240px;
             }
             
-            .command-center {
+            .command-center,
+            .ad-panel {
                 width: 100% !important;
+                min-width: unset !important;
+                max-width: unset !important;
                 flex: 1;
                 min-height: 0;
                 border-right: none !important;
                 border-bottom: none !important;
                 overflow-y: auto !important;
                 overflow-x: hidden !important;
-            }
-            
-            .ad-panel {
-                width: 100% !important;
-                flex: 1;
-                border-right: none !important;
-                border-bottom: none !important;
             }
             
             .command-center > div[style*="padding: 12px"],

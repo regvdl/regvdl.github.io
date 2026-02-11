@@ -1150,47 +1150,9 @@ function initializeWithSeedPulses() {
     console.log(`\n✅ Loaded existing game state with ${pulseData.pulseHistory.length} pulses`);
     return;
   }
-  
-  // Only create seed pulses if no saved data exists
+  // If no pulses, do nothing (no seed pulses)
   if (pulseData.pulseHistory.length === 0) {
-    console.log('\n🌱 ===== INITIALIZING SEED PULSES =====');
-    console.log('   No pulses found - creating initial beacons...');
-    
-    const seedCountries = ['US', 'GB', 'DE', 'JP', 'BR', 'AU', 'IN', 'CA', 'FR', 'ES', 'IT', 'RU', 'CN', 'MX', 'ZA'];
-    const countryBounds = {
-      'US': { latMin: 24.5210, latMax: 49.3844, lonMin: -125.0011, lonMax: -66.9326 },
-      'GB': { latMin: 50.0229, latMax: 58.6350, lonMin: -7.5721, lonMax: 1.7628 },
-      'DE': { latMin: 47.2701, latMax: 55.0996, lonMin: 5.8663, lonMax: 15.0419 },
-      'JP': { latMin: 30.3966, latMax: 45.5514, lonMin: 130.4017, lonMax: 145.8369 },
-      'BR': { latMin: -33.7683, latMax: 5.2419, lonMin: -73.9830, lonMax: -34.7725 },
-      'AU': { latMin: -43.6345, latMax: -10.6718, lonMin: 112.9211, lonMax: 154.3021 },
-      'IN': { latMin: 8.0883, latMax: 35.5047, lonMin: 68.1766, lonMax: 97.4025 },
-      'CA': { latMin: 41.6765, latMax: 83.1096, lonMin: -141.0017, lonMax: -52.6480 },
-      'FR': { latMin: 42.4314, latMax: 51.1242, lonMin: -5.1422, lonMax: 8.2275 },
-      'ES': { latMin: 36.0021, latMax: 43.7483, lonMin: -9.2393, lonMax: 3.0910 },
-      'IT': { latMin: 36.6230, latMax: 47.0921, lonMin: 6.6272, lonMax: 18.5203 },
-      'RU': { latMin: 41.1850, latMax: 81.8554, lonMin: 19.6389, lonMax: 169.6007 },
-      'CN': { latMin: 18.2671, latMax: 53.5604, lonMin: 73.5057, lonMax: 135.0865 },
-      'MX': { latMin: 14.5345, latMax: 32.7186, lonMin: -117.1205, lonMax: -86.8108 },
-      'ZA': { latMin: -34.8212, latMax: -22.0529, lonMin: 16.3449, lonMax: 32.8305 }
-    };
-    
-    seedCountries.forEach(country => {
-      const bounds = countryBounds[country];
-      if (bounds) {
-        const lat = bounds.latMin + Math.random() * (bounds.latMax - bounds.latMin);
-        const lon = bounds.lonMin + Math.random() * (bounds.lonMax - bounds.lonMin);
-        const detected = getCountryFromCoordinates(lat, lon);
-        addPulse(lat, lon, 'seed', null);
-        console.log(`   ✅ Seed: intended=${country}, detected=${detected.code} at (${lat.toFixed(4)}, ${lon.toFixed(4)})`);
-      }
-    });
-    
-    console.log(`   Total seed pulses created: ${pulseData.pulseHistory.length}`);
-    console.log('===== INITIALIZATION COMPLETE =====\n');
-    
-    // Save initial seed state
-    saveGameStateToFile();
+    console.log('\n🌱 No pulses found - starting with empty map.');
   }
 }
 
